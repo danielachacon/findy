@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to Findy{% endblock %}
+
+{% block content %}
+<div class="header-with-logo">
+    <img src="{% static 'img/buzz.png' %}" alt="Georgia Tech Buzz Mascot" class="mascot-logo">
+    <h1>Findy</h1>
+</div>
+    <p class="welcome-message">Hello, You're now logged in.</p>
+    <p>Ready to explore events happening at Georgia Tech?</p>
+
+    <div class="simple-buttons">
+        <a href="#" class="btn">Find Events</a>
+        <a href="#" class="btn">Create Event</a>
+    </div>
+{% endblock %}

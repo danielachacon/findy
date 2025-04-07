@@ -1,64 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Account Activation</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f4f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+{% extends 'base.html' %}
 
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-        }
+{% block title %}Account Activation{% endblock %}
 
-        h1 {
-            color: #003B5C;
-            margin-bottom: 20px;
-        }
-
-        p {
-            font-size: 16px;
-            color: #333333;
-            margin-bottom: 15px;
-        }
-
-        a.button {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 12px 24px;
-            font-size: 16px;
-            background-color: #003B5C;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background-color 0.3s ease;
-        }
-
-        a.button:hover {
-            background-color: #002b47;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Welcome, {{ user.username }}!</h1>
-        <p>Thank you for registering.</p>
-        <p>To activate your account, please check your inbox at <strong>{{ user.email }}</strong> and click the link we sent you.</p>
-        <p>Once you’ve activated your account, click below to log in:</p>
-        <a href="{{ login_url }}" class="button">Login</a>
-    </div>
-</body>
-</html>
+{% block content %}
+<h1>Welcome, {{ user.username }}!</h1>
+<p>Thank you for registering.</p>
+<p>To activate your account, please check your inbox at <strong>{{ user.email }}</strong> and click the link we sent you.</p>
+<p>Once you've activated your account, click below to log in:</p>
+<a href="{{ login_url }}" class="btn">Login</a>
+{% endblock %}

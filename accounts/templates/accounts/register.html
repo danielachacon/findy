@@ -1,150 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create an Account</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+{% extends 'base.html' %}
 
-        h2 {
-            text-align: center;
-            font-size: 24px;
-            color: #003B5C;
-            margin-bottom: 20px;
-        }
+{% block title %}Create an Account{% endblock %}
 
-        .container {
-            width: 400px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+{% block container_class %}container-narrow{% endblock %}
 
-        h2 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
+{% block content %}
+<h2>Create an Account</h2>
+<form method="POST">
+{% csrf_token %}
 
-        div {
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-size: 18px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        input:focus {
-            border-color: #003B5C;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.9em;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            font-size: 18px;
-            background-color: #003B5C;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #002b47;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <form method="POST">
-        {% csrf_token %}
-        <h2>Create an Account</h2>
-
-        <div>
-            <label for="id_username">Username:</label>
-            {{ form.username }}
-            {% if form.username.errors %}
-                <div class="error">
-                    <ul>
-                        {% for error in form.username.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
+<div>
+    <label for="id_username">Username:</label>
+    {{ form.username }}
+    {% if form.username.errors %}
+        <div class="error">
+            <ul>
+                {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
         </div>
+    {% endif %}
+</div>
 
-        <div>
-            <label for="id_email">Email:</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <div class="error">
-                    <ul>
-                        {% for error in form.email.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
+<div>
+    <label for="id_email">Email:</label>
+    {{ form.email }}
+    {% if form.email.errors %}
+        <div class="error">
+            <ul>
+                {% for error in form.email.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
         </div>
+    {% endif %}
+</div>
 
-        <div>
-            <label for="id_password">Password:</label>
-            {{ form.password }}
+<div>
+    <label for="id_password">Password:</label>
+    {{ form.password }}
+</div>
+
+<div>
+    <label for="id_confirm_password">Confirm Password:</label>
+    {{ form.confirm_password }}
+    {% if form.confirm_password.errors %}
+        <div class="error">
+            <ul>
+                {% for error in form.confirm_password.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
         </div>
+    {% endif %}
+</div>
 
-        <div>
-            <label for="id_confirm_password">Confirm Password:</label>
-            {{ form.confirm_password }}
-            {% if form.confirm_password.errors %}
-                <div class="error">
-                    <ul>
-                        {% for error in form.confirm_password.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-        </div>
+<button type="submit">Register</button>
+</form>
 
-        <button type="submit">Register</button>
-        </form>
-
-        <div class="form-footer">
-            <p>Have an account already? <a href="/accounts/login/">Login here</a></p>
-        </div>
-    </div>
-</body>
-</html>
+<div class="form-footer">
+    <p>Have an account already? <a href="/accounts/login/">Login here</a></p>
+</div>
+{% endblock %}

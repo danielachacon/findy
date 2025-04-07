@@ -1,0 +1,193 @@
+/* Global Styles */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container Styles */
+.container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.container-narrow {
+    max-width: 400px;
+}
+
+.container-wide {
+    max-width: 800px;
+}
+
+/* Typography */
+h1 {
+    color: #003B5C;
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+h2 {
+    color: #003B5C;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #555;
+}
+
+/* Form Elements */
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input:focus {
+    border-color: #003B5C;
+    outline: none;
+}
+
+.error {
+    color: #e53935;
+    font-size: 0.9em;
+    text-align: left;
+    margin-top: 5px;
+}
+
+/* Button Styles */
+.btn, button {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #003B5C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover, button:hover {
+    background-color: #002b47;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Button Container */
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Simple Buttons for Dashboard */
+.simple-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.simple-buttons .btn {
+    min-width: 150px;
+    padding: 12px 24px;
+    font-weight: bold;
+}
+
+/* Form Footer */
+.form-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Success Message */
+.success-message {
+    color: #28a745;
+}
+
+/* Special Layouts */
+.centered-full-height {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Header with Logo */
+.header-with-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.mascot-logo {
+    height: 50px;
+    margin-right: 15px;
+}
+
+/* Welcome Message */
+.welcome-message {
+    font-size: 20px;
+    color: #003B5C;
+    margin-bottom: 10px;
+}
+
+/* Auth Required Message */
+.auth-required {
+    background-color: #f8f9fa;
+    border-left: 4px solid #003B5C;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.auth-required p {
+    margin-bottom: 10px;
+}
+
+.auth-required a {
+    color: #003B5C;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.auth-required a:hover {
+    color: #002b47;
+}
