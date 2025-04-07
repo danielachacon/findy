@@ -45,7 +45,7 @@ def user_login(request):
             user = form.get_user()
             if user.is_active:
                 login(request, user)
-                return render(request, 'accounts/login_success.html', {'user': user})
+                return redirect('/start/')
             else:
                 error_message = "Your account is inactive. Please verify your email to activate your account."
                 return render(request, 'accounts/login.html', {'form': form, 'error_message': error_message})
