@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ template_data.title }}{% endblock %}
+
+{% block content %}
+<div class="header-with-logo">
+    <img src="{% static 'img/buzz.png' %}" alt="Georgia Tech Buzz Mascot" class="mascot-logo">
+    <h1>Welcome to Findy</h1>
+</div>
+<p>
+    Findy is a web application dedicated to helping new students at Georgia Tech find events
+happening on campus! 
+</p>
+
+<div class="buttons">
+    <a href="/accounts/login/" class="btn">Login</a>
+    <a href="/accounts/register/" class="btn">Sign Up</a>
+</div>
+{% endblock %}
