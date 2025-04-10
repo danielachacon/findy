@@ -25,6 +25,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', RedirectView.as_view(url='/about/', permanent=False)),
     path('', include('home.urls')),
+    path('main/', include('main.urls')),
 ]
 
 # Serve static files during development
