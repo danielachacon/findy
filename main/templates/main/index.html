@@ -13,6 +13,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -27,9 +29,87 @@
         <div id="left">
             <div id="box"><h3>Registered Events</h3></div>
             <div id="box"><h3>Starred Events</h3></div>
-            <div id="box"><h3>Created Events</h3></div>
+            <button id="created-events-button" onclick="openCreatedEventsPopup()">Created Events</button>
+            <button id="create-event-button" onclick="openPopup()">+ Create New Event</button>
         </div>
         <div id="map"></div>
+    </div>
+
+    <div id="popup-overlay" class="hidden">
+      <div id="popup">
+        <span class="popup-close">&times;</span>
+        <h2>Create Event</h2>
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label for="id_title">Title:</label>
+            {{ form.title }}
+          </div>
+
+          <div class="form-group">
+            <label for="id_description">Description:</label>
+            {{ form.description }}
+          </div>
+
+          <div class="form-group">
+            <label for="id_start_time">Start Time:</label>
+            {{ form.start_time }}
+            {% if form.start_time.errors %}
+              <div class="error">
+                {% for error in form.start_time.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="id_end_time">End Time:</label>
+            {{ form.end_time }}
+          </div>
+
+          <div class="form-group">
+            <label for="id_location">Location:</label>
+            {{ form.location }}
+          </div>
+
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="created-events-overlay" class="hidden">
+      <div id="created-events-popup">
+        <span class="popup-close" onclick="closeCreatedEventsPopup()">&times;</span>
+        <h2>Your Created Events</h2>
+
+        {% if created_events %}
+          <ul class="event-list">
+            {% for event in created_events %}
+              <li class="event-item">
+                <div class="event-info">
+                  <h3>{{ event.title }}</h3>
+                  <p>
+                    <strong>When:</strong>
+                    {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                    <strong>Location:</strong> {{ event.location }}
+                  </p>
+                </div>
+                <div class="event-actions">
+                  <a href="{% url 'edit_event' event.id %}" class="edit-btn">Edit</a>
+                  <form method="POST" action="{% url 'delete_event' event.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-btn">Delete</button>
+                  </form>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="no-events-msg">You haven't created any events yet.</p>
+        {% endif %}
+      </div>
     </div>
 
     <script>
@@ -64,5 +144,51 @@
     .addTo(map)
     .bindPopup('Klaus Advanced Computing Building')
     .openPopup();
+
+    const popup = document.getElementById("popup-overlay");
+    const closeBtn = document.querySelector("#popup .popup-close");
+
+    function openPopup() {
+        popup.classList.remove("hidden");
+    }
+
+    closeBtn.addEventListener("click", () => {
+        popup.classList.add("hidden");
+    });
+
+    popup.addEventListener("click", (e) => {
+        if (e.target === popup) popup.classList.add("hidden");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        popup.classList.add("hidden");
+        createdEventsOverlay.classList.add("hidden");
+      }
+    });
+
+    const createdEventsOverlay = document.getElementById("created-events-overlay");
+
+    function openCreatedEventsPopup() {
+      createdEventsOverlay.classList.remove("hidden");
+    }
+
+    function closeCreatedEventsPopup() {
+      createdEventsOverlay.classList.add("hidden");
+    }
+
+    document.getElementById("created-events-button").addEventListener("click", openCreatedEventsPopup);
+
+    createdEventsOverlay.addEventListener("click", (e) => {
+      if (e.target === createdEventsOverlay) {
+        createdEventsOverlay.classList.add("hidden");
+      }
+    });
+
+    flatpickr(".datetimepicker", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: false
+      });
     </script>
 </body>
