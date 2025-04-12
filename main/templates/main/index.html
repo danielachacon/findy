@@ -55,7 +55,7 @@
 
     <div id="register-popup" class="hidden">
         <div id="popup">
-            <span class="popup-close">&times;</span>
+            <span class="popup-close registers">&times;</span>
             <h2>Register for Event</h2>
             <form method="POST">
                 {%  csrf_token %}
@@ -74,7 +74,7 @@
 
     <div id="popup-overlay" class="hidden">
       <div id="popup">
-        <span class="popup-close">&times;</span>
+        <span class="popup-close events">&times;</span>
         <h2>Create Event</h2>
         <form method="POST">
           {% csrf_token %}
@@ -184,8 +184,8 @@
 
     const popup = document.getElementById("popup-overlay");
     const rpopup = document.getElementById("register-popup");
-    const closeBtn = document.querySelector("#popup .popup-close");
-    const closeRBtn = document.querySelector("#register-popup #popup .popup-close");
+    const closeBtn = document.querySelector("#popup .events");
+    const closeRBtn = document.querySelector("#popup .registers");
 
     function openPopup() {
         popup.classList.remove("hidden");
@@ -195,13 +195,13 @@
         rpopup.classList.remove("hidden");
     }
 
-    closeRBtn.addEventListener("click", () => {
-        rpopup.classList.add("hidden");
-    })
-
     closeBtn.addEventListener("click", () => {
         popup.classList.add("hidden");
     });
+
+    closeRBtn.addEventListener("click", () => {
+        rpopup.classList.add("hidden");
+    })
 
     popup.addEventListener("click", (e) => {
         if (e.target === popup) popup.classList.add("hidden");
