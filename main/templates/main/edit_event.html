@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Event</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Roboto', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .edit-container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      max-width: 450px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #003B5C;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 14px;
+      color: #003B5C;
+    }
+
+    input,
+    textarea {
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #003B5C;
+      outline: none;
+    }
+
+    textarea {
+      resize: none;
+      min-height: 80px;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn-row button,
+    .btn-row a {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-save {
+      background-color: #003B5C;
+      color: white;
+    }
+
+    .btn-cancel {
+      background-color: #ccc;
+      color: black;
+    }
+
+    .btn-save:hover {
+      background-color: #002744;
+    }
+
+    .btn-cancel:hover {
+      background-color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <h2>Edit Event</h2>
+    <form method="POST">
+      {% csrf_token %}
+      <label for="id_title">Title:</label>
+      {{ form.title }}
+
+      <label for="id_description">Description:</label>
+      {{ form.description }}
+
+      <label for="id_start_time">Start Time:</label>
+      {{ form.start_time }}
+
+      <label for="id_end_time">End Time:</label>
+      {{ form.end_time }}
+
+      <label for="id_location">Location:</label>
+      {{ form.location }}
+
+      <div class="btn-row">
+        <button type="submit" href="{% url 'main' %}" class="btn-save">Save Changes</button>
+        <a href="{% url 'main' %}" class="btn-cancel">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
