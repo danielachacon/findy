@@ -8,10 +8,11 @@ from django.http import JsonResponse
 def main_view(request):
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
+    events = Event.objects
 
     if request.method == 'POST':
         form = CustomEventForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and submit_event in request.POST:
             cd = form.cleaned_data
             Event.objects.create(
                 title=cd['title'],
@@ -29,7 +30,8 @@ def main_view(request):
 
     return render(request, 'main/index.html', {
         'form': form,
-        'created_events': created_events
+        'created_events': created_events,
+        'events':events
     })
 
 @login_required
