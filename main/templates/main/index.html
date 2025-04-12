@@ -38,9 +38,7 @@
                             {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
                             <strong>Location:</strong> {{ event.location }}
                           </p>
-                            <div class="event-actions" id="register">
-                                <button class="register-btn">Register</button>
-                            </div>
+                            <button class="register-btn" onclick=openRPopup()>Register</button>
                         </div>
 
                       </li>
@@ -55,7 +53,7 @@
         <div id="map"></div>
     </div>
 
-    <div id="reigster-popup" class="hidden">
+    <div id="register-popup" class="hidden">
         <div id="popup">
             <span class="popup-close">&times;</span>
             <h2>Register for Event</h2>
@@ -65,7 +63,13 @@
                     <label for="id_name">Name:</label>
                     {{ form.name }}
                 </div>
+                <div class="form-group">
+                    <label for="id_email">Email:</label>
+                    {{ form.email }}
+                </div>
+                <button type="submit" name="submit_register">Submit</button>
             </form>
+        </div>
     </div>
 
     <div id="popup-overlay" class="hidden">
@@ -179,11 +183,21 @@
     .openPopup();
 
     const popup = document.getElementById("popup-overlay");
+    const rpopup = document.getElementById("register-popup");
     const closeBtn = document.querySelector("#popup .popup-close");
+    const closeRBtn = document.querySelector("#register-popup #popup .popup-close");
 
     function openPopup() {
         popup.classList.remove("hidden");
     }
+
+    function openRPopup() {
+        rpopup.classList.remove("hidden");
+    }
+
+    closeRBtn.addEventListener("click", () => {
+        rpopup.classList.add("hidden");
+    })
 
     closeBtn.addEventListener("click", () => {
         popup.classList.add("hidden");

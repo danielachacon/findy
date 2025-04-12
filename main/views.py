@@ -24,6 +24,14 @@ def main_view(request):
             )
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
+        elif form.is_valid() and submit_register in request.POST:
+            cd = form.cleaned_data
+            Registration.objects.create(
+                name=cd['name'],
+                email=cd['email']
+            )
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
         else:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'errors': form.errors}, status=400)

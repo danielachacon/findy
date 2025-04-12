@@ -75,6 +75,7 @@ header {
 }
 
 #popup-overlay,
+#register-popup,
 #created-events-overlay {
     position: fixed;
     top: 0;
