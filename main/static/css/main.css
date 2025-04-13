@@ -258,7 +258,7 @@ header {
     background-color: #002744;
 }
 
-.delete-btn, .unregister-btn {
+.delete-btn {
     background-color: #d9534f;
     color: white;
     transition: background-color 0.2s ease;
@@ -270,7 +270,6 @@ header {
 
 .no-events-msg {
     text-align: center;
-    font-style: italic;
     color: #666;
 }
 
