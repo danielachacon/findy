@@ -75,6 +75,7 @@ header {
 }
 
 #popup-overlay,
+#register-popup,
 #created-events-overlay {
     position: fixed;
     top: 0;
@@ -117,7 +118,7 @@ header {
     text-align: center;
 }
 
-#popup form {
+#popup form{
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -244,6 +245,15 @@ header {
     transition: background-color 0.2s ease;
 }
 
+.register-btn {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: none;
+    background-color: #003B5C;
+    color: white;
+    transition: background-color 0.2s ease;
+}
+
 .edit-btn:hover {
     background-color: #002744;
 }
@@ -260,7 +270,6 @@ header {
 
 .no-events-msg {
     text-align: center;
-    font-style: italic;
     color: #666;
 }
 
