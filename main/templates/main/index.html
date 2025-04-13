@@ -27,7 +27,51 @@
 
     <div id="second">
         <div id="left">
-            <div id="box"><h3>Registered Events</h3></div>
+            <div id="box"><h3>Events</h3>
+                <ul class="event-list">
+                    {% for event in created_events %}
+                      <li class="event-item">
+                        <div class="event-info">
+                          <h3>{{ event.title }}</h3>
+                          <p>
+                            <strong>When:</strong>
+                            {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                            <strong>Location:</strong> {{ event.location }}
+                          </p>
+
+                                {% if request.user in event.registered_users.all %}
+                                    <button class="register-btn"> Registered </button>
+                                {%  else %}
+                                    <button class="register-btn" onclick=openRPopup({{ event.id }})> Register </button>
+                                {%  endif %}
+                        </div>
+
+                      </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="box"><h3>Registered Events</h3>
+                <ul class="event-list">
+                    {% for event in registered_events %}
+                    <li class="event-item">
+                        <div class="event-info">
+                            <h3>{{ event.title }}</h3>
+                            <p>
+                                <strong>When:</strong>
+                                {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                                <strong>Location:</strong> {{ event.location }}
+                            </p>
+                            <form method="POST" action="{% url 'unregister_event' event.id %}" class="unregister-form">
+                                {% csrf_token %}
+                                <button type="submit" class="unregister-btn">Unregister</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="no-events-msg">You haven't registered for any events yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
             <div id="box"><h3>Starred Events</h3></div>
             <button id="created-events-button" onclick="openCreatedEventsPopup()">Created Events</button>
             <button id="create-event-button" onclick="openPopup()">+ Create New Event</button>
@@ -35,12 +79,27 @@
         <div id="map"></div>
     </div>
 
+    <div id="register-popup" class="hidden">
+        <div id="popup">
+            <span class="popup-close registers">&times;</span>
+            <h2>Register for Event</h2>
+            <p>Are you sure you want to Register?</p>
+            <form method="POST">
+                {%  csrf_token %}
+                <input type="hidden" name="event_id" id="event_id_field">
+                <button type="submit" name="submit_register">Register</button>
+            </form>
+        </div>
+    </div>
+
     <div id="popup-overlay" class="hidden">
       <div id="popup">
-        <span class="popup-close">&times;</span>
+        <span class="popup-close events">&times;</span>
         <h2>Create Event</h2>
         <form method="POST">
           {% csrf_token %}
+
+          <input type="hidden" name="event_id" id="event_id_field">
 
           <div class="form-group">
             <label for="id_title">Title:</label>
@@ -73,8 +132,7 @@
             <label for="id_location">Location:</label>
             {{ form.location }}
           </div>
-
-          <button type="submit">Submit</button>
+            <button type="submit" name="submit_event">Submit</button>
         </form>
       </div>
     </div>
@@ -146,15 +204,29 @@
     .openPopup();
 
     const popup = document.getElementById("popup-overlay");
-    const closeBtn = document.querySelector("#popup .popup-close");
+    const rpopup = document.getElementById("register-popup");
+    const closeBtn = document.querySelector("#popup .events");
+    const closeRBtn = document.querySelector("#popup .registers");
 
     function openPopup() {
         popup.classList.remove("hidden");
     }
 
+    let currentEventId = null;
+
+    function openRPopup(eventId) {
+        currentEventId = eventId;
+        document.getElementById('event_id_field').value = eventId;
+        rpopup.classList.remove("hidden");
+    }
+
     closeBtn.addEventListener("click", () => {
         popup.classList.add("hidden");
     });
+
+    closeRBtn.addEventListener("click", () => {
+        rpopup.classList.add("hidden");
+    })
 
     popup.addEventListener("click", (e) => {
         if (e.target === popup) popup.classList.add("hidden");
