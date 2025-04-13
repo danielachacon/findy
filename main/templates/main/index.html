@@ -38,39 +38,40 @@
                             {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
                             <strong>Location:</strong> {{ event.location }}
                           </p>
-                            <button class="register-btn" onclick=openRPopup({{ event.id }})>Register</button>
+
+                                {% if request.user in event.registered_users.all %}
+                                    <button class="register-btn"> Registered </button>
+                                {%  else %}
+                                    <button class="register-btn" onclick=openRPopup({{ event.id }})> Register </button>
+                                {%  endif %}
                         </div>
 
                       </li>
                     {% endfor %}
                 </ul>
             </div>
-            <div id="box"><h3>Registered Events</h3></div>
+            <div id="box"><h3>Registered Events</h3>
                 <ul class="event-list">
                     {% for event in registered_events %}
-                      <li class="event-item">
+                    <li class="event-item">
                         <div class="event-info">
-                          <h3>{{ event.title }}</h3>
-                          <p>
-                            <strong>When:</strong>
-                            {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                            <strong>Location:</strong> {{ event.location }}
-                          </p>
-                            <form
-                                    method="POST",
-                                    action = "{% url 'unregister_event' event.id %}",
-                                    class="unregister-form">
+                            <h3>{{ event.title }}</h3>
+                            <p>
+                                <strong>When:</strong>
+                                {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                                <strong>Location:</strong> {{ event.location }}
+                            </p>
+                            <form method="POST" action="{% url 'unregister_event' event.id %}" class="unregister-form">
                                 {% csrf_token %}
-                                <button
-                                    type="submit",
-                                    class="unregister-btn",
-                                    data-event-id="{{ event.id }}"
-                                    >Unregister</button>
+                                <button type="submit" class="unregister-btn">Unregister</button>
                             </form>
                         </div>
-                      </li>
+                    </li>
+                    {% empty %}
+                    <li class="no-events-msg">You haven't registered for any events yet.</li>
                     {% endfor %}
                 </ul>
+            </div>
             <div id="box"><h3>Starred Events</h3></div>
             <button id="created-events-button" onclick="openCreatedEventsPopup()">Created Events</button>
             <button id="create-event-button" onclick="openPopup()">+ Create New Event</button>

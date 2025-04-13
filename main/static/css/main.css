@@ -118,7 +118,7 @@ header {
     text-align: center;
 }
 
-#popup form {
+#popup form{
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -258,7 +258,7 @@ header {
     background-color: #002744;
 }
 
-.delete-btn {
+.delete-btn, .unregister-btn {
     background-color: #d9534f;
     color: white;
     transition: background-color 0.2s ease;
