@@ -51,6 +51,16 @@ def main_view(request):
     })
 
 @login_required
+def unregister_event(request, event_id):
+    registration = Registration.objects.get(
+        event_id=event_id,
+        user=request.user,
+    )
+    if request.method == "POST":
+        registration.delete()
+    return redirect('main')
+
+@login_required
 def delete_event(request, event_id):
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)

@@ -26,5 +26,8 @@ class Registration(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def delete_registration(self):
+        self.delete()
+
     def __str__(self):
         return f"{self.event} @ {self.user.username}"
