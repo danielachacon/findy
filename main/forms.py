@@ -3,8 +3,8 @@ from django import forms
 from django.forms.widgets import DateTimeInput
 
 class CustomEventForm(forms.Form):
-    name = forms.CharField(max_length=100, required=True),
-    email = forms.EmailField(max_length=100, required=True),
+    name = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(max_length=100, required=True)
 
     title = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea, required=True)

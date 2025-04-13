@@ -8,13 +8,13 @@ from django.http import JsonResponse
 def main_view(request):
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
-    events = Event.objects
+    events = Event.objects.all()
 
     if request.method == 'POST':
         form = CustomEventForm(request.POST)
         if form.is_valid() and submit_event in request.POST:
             cd = form.cleaned_data
-            Event.objects.create(
+            event = Event.objects.create(
                 title=cd['title'],
                 description=cd['description'],
                 start_time=cd['start_time'],
@@ -26,10 +26,18 @@ def main_view(request):
                 return JsonResponse({'success': True})
         elif form.is_valid() and submit_register in request.POST:
             cd = form.cleaned_data
-            Registration.objects.create(
+            event_id = request.POST.get('event_id')
+            event = Event.objects.get(id=event_id)
+            user = EventUser.objects.create(
                 name=cd['name'],
                 email=cd['email']
             )
+
+            Registration.objects.create(
+                user = user,
+                event = event,
+            )
+
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
         else:
