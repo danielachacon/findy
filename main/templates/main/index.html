@@ -46,6 +46,22 @@
                 </ul>
             </div>
             <div id="box"><h3>Registered Events</h3></div>
+                <ul class="event-list">
+                    {% for event in registered_events %}
+                      <li class="event-item">
+                        <div class="event-info">
+                          <h3>{{ event.title }}</h3>
+                          <p>
+                            <strong>When:</strong>
+                            {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                            <strong>Location:</strong> {{ event.location }}
+                          </p>
+                            <button class="register-btn" onclick=openRPopup({{ event.id }})>Register</button>
+                        </div>
+
+                      </li>
+                    {% endfor %}
+                </ul>
             <div id="box"><h3>Starred Events</h3></div>
             <button id="created-events-button" onclick="openCreatedEventsPopup()">Created Events</button>
             <button id="create-event-button" onclick="openPopup()">+ Create New Event</button>
@@ -59,14 +75,7 @@
             <h2>Register for Event</h2>
             <form method="POST">
                 {%  csrf_token %}
-                <div class="form-group">
-                    <label for="id_name">Name:</label>
-                    {{ form.name }}
-                </div>
-                <div class="form-group">
-                    <label for="id_email">Email:</label>
-                    {{ form.email }}
-                </div>
+                <input type="hidden" name="event_id" id="event_id_field">
                 <button type="submit" name="submit_register">Submit</button>
             </form>
         </div>
@@ -112,8 +121,7 @@
             <label for="id_location">Location:</label>
             {{ form.location }}
           </div>
-
-          <button type="submit" name="submit_event">Submit</button>
+            <button type="submit" name="submit_event">Submit</button>
         </form>
       </div>
     </div>

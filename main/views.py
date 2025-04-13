@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomEventForm
-from .models import Event
+from .models import Event, Registration
 from django.http import JsonResponse
 
 @login_required
@@ -9,10 +9,14 @@ def main_view(request):
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
     events = Event.objects.all()
+    registered_events = request.user.registered_events.all()
 
     if request.method == 'POST':
         form = CustomEventForm(request.POST)
-        if form.is_valid() and submit_event in request.POST:
+        print(form.is_valid())
+        print(form.errors)
+
+        if form.is_valid() and 'submit_event' in request.POST:
             cd = form.cleaned_data
             event = Event.objects.create(
                 title=cd['title'],
@@ -24,30 +28,26 @@ def main_view(request):
             )
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
-        elif form.is_valid() and submit_register in request.POST:
-            cd = form.cleaned_data
+        elif 'submit_register' in request.POST:
             event_id = request.POST.get('event_id')
             event = Event.objects.get(id=event_id)
-            user = EventUser.objects.create(
-                name=cd['name'],
-                email=cd['email']
-            )
-
             Registration.objects.create(
-                user = user,
+                user = request.user,
                 event = event,
             )
 
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
         else:
+            print("this is what is happening")
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
     return render(request, 'main/index.html', {
         'form': form,
         'created_events': created_events,
-        'events':events
+        'events':events,
+        'registered_events':registered_events,
     })
 
 @login_required

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 User = get_user_model()
+
 class Event(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
@@ -12,9 +13,9 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     registered_users = models.ManyToManyField(
-        EventUser,
+        User,
         through='Registration',
-        related_name='registered_users',
+        related_name='registered_events',
         blank=True,
     )
 
@@ -27,10 +28,3 @@ class Registration(models.Model):
 
     def __str__(self):
         return f"{self.event} @ {self.user.username}"
-
-class EventUser(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-
-    def __str__(self):
-        return f"{self.name} @ {self.email}"
