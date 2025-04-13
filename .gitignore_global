@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+
+*.sqlite3
+*.log
+.env
+.env.*
+
+venv/
+.venv/
+
+.idea/
+*.iml
+
+.DS_Storedb.sqlite3
+.idea/workspace.xml
+
