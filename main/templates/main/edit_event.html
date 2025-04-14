@@ -350,6 +350,11 @@
         return;
       }
       
+      //EDGE CASE with custom location being edited with a
+      //new custom location, make sure the new custom location
+      //is displayed on the map
+      formValues['custom_lat'] = customLatField.value;
+      formValues['custom_lng'] = customLngField.value;
 
       mapContainer.style.display = 'none';
       mapInstructions.style.display = 'none';
