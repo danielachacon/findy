@@ -19,6 +19,9 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Hidden div to pass location data from Python to JavaScript -->
+    <div id="location-data" data-locations="{{ locations_json }}" style="display: none;"></div>
+    
     <nav class="navbar navbar-dark bg-dark">
       <!-- Navbar content -->
     </nav>
@@ -30,7 +33,10 @@
             <div id="box"><h3>Events</h3>
                 <ul class="event-list">
                     {% for event in created_events %}
-                      <li class="event-item">
+                      <li class="event-item" data-event-id="{{ event.id }}" data-location="{{ event.location }}" 
+                          {% if event.custom_lat and event.custom_lng %}
+                          data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
+                          {% endif %}>
                         <div class="event-info">
                           <h3>{{ event.title }}</h3>
                           <p>
@@ -42,7 +48,7 @@
                                 {% if request.user in event.registered_users.all %}
                                     <button class="register-btn"> Registered </button>
                                 {%  else %}
-                                    <button class="register-btn" onclick=openRPopup({{ event.id }})> Register </button>
+                                    <button class="register-btn" onclick="openRPopup('{{ event.id }}'); return false;"> Register </button>
                                 {%  endif %}
                         </div>
 
@@ -53,7 +59,10 @@
             <div id="box"><h3>Registered Events</h3>
                 <ul class="event-list">
                     {% for event in registered_events %}
-                    <li class="event-item">
+                    <li class="event-item" data-event-id="{{ event.id }}" data-location="{{ event.location }}"
+                        {% if event.custom_lat and event.custom_lng %}
+                        data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
+                        {% endif %}>
                         <div class="event-info">
                             <h3>{{ event.title }}</h3>
                             <p>
@@ -84,10 +93,12 @@
             <span class="popup-close registers">&times;</span>
             <h2>Register for Event</h2>
             <p>Are you sure you want to Register?</p>
-            <form method="POST">
+            <form method="POST" id="register-form">
                 {%  csrf_token %}
                 <input type="hidden" name="event_id" id="event_id_field">
-                <button type="submit" name="submit_register">Register</button>
+                <input type="hidden" name="event_location" id="event_location_field">
+                <input type="hidden" name="submit_register" value="true">
+                <button type="submit" name="submit_register" value="true">Register</button>
             </form>
         </div>
     </div>
@@ -99,7 +110,7 @@
         <form method="POST">
           {% csrf_token %}
 
-          <input type="hidden" name="event_id" id="event_id_field">
+          <input type="hidden" name="event_id" id="create_event_id_field">
 
           <div class="form-group">
             <label for="id_title">Title:</label>
@@ -132,6 +143,14 @@
             <label for="id_location">Location:</label>
             {{ form.location }}
           </div>
+
+          <div class="form-group" id="custom-location-field" style="display: none;">
+            <label for="id_custom_location">Custom Location Name:</label>
+            <input type="text" name="custom_location" id="id_custom_location" class="form-control" placeholder="Enter custom location name" required>
+            <input type="hidden" name="custom_lat" id="custom_lat_field">
+            <input type="hidden" name="custom_lng" id="custom_lng_field">
+          </div>
+
             <button type="submit" name="submit_event">Submit</button>
         </form>
       </div>
@@ -145,7 +164,10 @@
         {% if created_events %}
           <ul class="event-list">
             {% for event in created_events %}
-              <li class="event-item">
+              <li class="event-item" data-event-id="{{ event.id }}" data-location="{{ event.location }}"
+                  {% if event.custom_lat and event.custom_lng %}
+                  data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
+                  {% endif %}>
                 <div class="event-info">
                   <h3>{{ event.title }}</h3>
                   <p>
@@ -171,6 +193,18 @@
     </div>
 
     <script>
+    let gtLocations = {};
+    try {
+        const locationDataElement = document.getElementById('location-data');
+        if (locationDataElement && locationDataElement.dataset.locations) {
+            gtLocations = JSON.parse(locationDataElement.dataset.locations);
+        } else {
+            console.error("Location data not found in the DOM");
+        }
+    } catch (e) {
+        console.error("Error parsing location data:", e);
+    }
+    
     const georgiaTechBounds = L.latLngBounds(
         L.latLng(33.770, -84.405),
         L.latLng(33.780, -84.385)
@@ -187,59 +221,25 @@
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    const campusBoundary = L.polygon([
-        [33.770, -84.405], // SW corner
-        [33.770, -84.385], // SE corner
-        [33.780, -84.385], // NE corner
-        [33.780, -84.405]  // NW corner
+    L.polygon([
+        [33.770, -84.405], [33.770, -84.385], 
+        [33.780, -84.385], [33.780, -84.405]
     ], {
-    color: "#003B5C",  // GT Gold color
-    fillOpacity: 0.05,  // Slight transparency
-    weight: 2
+        color: "#003B5C",
+        fillOpacity: 0.05,
+        weight: 2
     }).addTo(map);
-
-    L.marker([33.7772, -84.3963])
-    .addTo(map)
-    .bindPopup('Klaus Advanced Computing Building')
-    .openPopup();
 
     const popup = document.getElementById("popup-overlay");
     const rpopup = document.getElementById("register-popup");
     const closeBtn = document.querySelector("#popup .events");
     const closeRBtn = document.querySelector("#popup .registers");
+    const registerForm = document.getElementById("register-form");
+    const createdEventsOverlay = document.getElementById("created-events-overlay");
 
     function openPopup() {
         popup.classList.remove("hidden");
     }
-
-    let currentEventId = null;
-
-    function openRPopup(eventId) {
-        currentEventId = eventId;
-        document.getElementById('event_id_field').value = eventId;
-        rpopup.classList.remove("hidden");
-    }
-
-    closeBtn.addEventListener("click", () => {
-        popup.classList.add("hidden");
-    });
-
-    closeRBtn.addEventListener("click", () => {
-        rpopup.classList.add("hidden");
-    })
-
-    popup.addEventListener("click", (e) => {
-        if (e.target === popup) popup.classList.add("hidden");
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        popup.classList.add("hidden");
-        createdEventsOverlay.classList.add("hidden");
-      }
-    });
-
-    const createdEventsOverlay = document.getElementById("created-events-overlay");
 
     function openCreatedEventsPopup() {
       createdEventsOverlay.classList.remove("hidden");
@@ -248,9 +248,342 @@
     function closeCreatedEventsPopup() {
       createdEventsOverlay.classList.add("hidden");
     }
+   
+    let customLocationSelected = false;
+    
+    function addLocationMarker(locationName, eventTitle, customLat, customLng) {
+        if (customLat !== undefined && customLng !== undefined) {
+            L.marker([customLat, customLng])
+              .addTo(map)
+              .bindPopup(eventTitle || 'Custom Location')
+              .openPopup();
+            
+            map.setView([customLat, customLng], 17);
+            return; 
+        }
+        
+        if (gtLocations[locationName]) {
+            const loc = gtLocations[locationName];
+            const popupContent = eventTitle || loc.name;
+            
+            L.marker([loc.lat, loc.lng])
+              .addTo(map)
+              .bindPopup(popupContent)
+              .openPopup();
+            
+            map.setView([loc.lat, loc.lng], 17);
+        } 
+        else {
+            const events = document.querySelectorAll('.event-item');
+            let customCoords = null;
+            
+            events.forEach(function(eventItem) {
+                const eventLocation = eventItem.getAttribute('data-location');
+                const eventCustomLat = eventItem.getAttribute('data-custom-lat');
+                const eventCustomLng = eventItem.getAttribute('data-custom-lng');
+                
+                if (eventLocation === locationName && eventCustomLat && eventCustomLng) {
+                    customCoords = {
+                        lat: parseFloat(eventCustomLat),
+                        lng: parseFloat(eventCustomLng)
+                    };
+                }
+            });
+            
+            if (customCoords) {
+                L.marker([customCoords.lat, customCoords.lng])
+                  .addTo(map)
+                  .bindPopup(eventTitle || locationName)
+                  .openPopup();
+                
+                map.setView([customCoords.lat, customCoords.lng], 17);
+            }
+        }
+    }
 
+    function openRPopup(eventId) {
+        const eventItem = document.querySelector(`[data-event-id="${eventId}"]`);
+        if (eventItem) {
+            const currentEventLocation = eventItem.getAttribute('data-location');
+            document.getElementById('event_location_field').value = currentEventLocation;
+        }
+        
+        document.getElementById('event_id_field').value = eventId;
+        rpopup.classList.remove("hidden");
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const locationDropdown = document.querySelector('[name="location"]');
+        const customLocationField = document.getElementById('custom-location-field');
+        const customLocationInput = document.getElementById('id_custom_location');
+        const customLatField = document.getElementById('custom_lat_field');
+        const customLngField = document.getElementById('custom_lng_field');
+        let formValues = {}; 
+        let customMarker = null; 
+       
+        const confirmButton = document.createElement('button');
+        confirmButton.id = 'confirm-location';
+        confirmButton.textContent = 'Use This Location';
+        confirmButton.style.position = 'fixed';
+        confirmButton.style.bottom = '20px';
+        confirmButton.style.right = '20px';
+        confirmButton.style.zIndex = '1000';
+        confirmButton.style.padding = '10px 15px';
+        confirmButton.style.backgroundColor = '#003B5C';
+        confirmButton.style.color = 'white';
+        confirmButton.style.border = 'none';
+        confirmButton.style.borderRadius = '5px';
+        confirmButton.style.cursor = 'pointer';
+        confirmButton.style.display = 'none';
+        document.body.appendChild(confirmButton);
+        
+        const mapInstructions = document.createElement('div');
+        mapInstructions.id = 'map-instructions';
+        mapInstructions.textContent = 'Click on the map to select your custom location';
+        mapInstructions.style.position = 'fixed';
+        mapInstructions.style.top = '80px';
+        mapInstructions.style.left = '50%';
+        mapInstructions.style.transform = 'translateX(-50%)';
+        mapInstructions.style.zIndex = '1000';
+        mapInstructions.style.padding = '10px 15px';
+        mapInstructions.style.backgroundColor = 'rgba(0, 59, 92, 0.8)';
+        mapInstructions.style.color = 'white';
+        mapInstructions.style.borderRadius = '5px';
+        mapInstructions.style.display = 'none';
+        document.body.appendChild(mapInstructions);
+        
+        function storeFormData() {
+            const form = document.querySelector('#popup-overlay form');
+            const formElements = form.elements;
+            for (let i = 0; i < formElements.length; i++) {
+                if (formElements[i].name) {
+                    formValues[formElements[i].name] = formElements[i].value;
+                }
+            }
+        }
+        
+        function restoreFormData() {
+            const form = document.querySelector('#popup-overlay form');
+            const formElements = form.elements;
+            for (let i = 0; i < formElements.length; i++) {
+                if (formElements[i].name && formValues[formElements[i].name]) {
+                    formElements[i].value = formValues[formElements[i].name];
+                }
+            }
+           
+            locationDropdown.value = "Custom";
+            customLocationField.style.display = 'block';
+            customLocationInput.disabled = false;
+            customLocationInput.focus();
+        }
+        
+        function handleMapClick(e) {
+            if (customMarker) {
+                map.removeLayer(customMarker);
+            }
+
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            customLatField.value = lat;
+            customLngField.value = lng;
+            
+            customMarker = L.marker([lat, lng]).addTo(map);
+            customMarker.bindPopup('Your custom location').openPopup();
+            
+            confirmButton.style.display = 'block';
+            confirmButton.disabled = false;
+        }
+        
+        if (locationDropdown && customLocationField && customLocationInput) {
+            customLocationSelected = locationDropdown.value === "Custom";
+            if (customLocationSelected) {
+                customLocationField.style.display = 'block';
+            } else {
+                customLocationField.style.display = 'none';
+                customLocationInput.disabled = true;
+            }
+            
+            locationDropdown.addEventListener('change', function() {
+                customLocationSelected = this.value === "Custom";
+                
+                if (customLocationSelected) {
+                    storeFormData();
+                    customLocationField.style.display = 'block';
+                    customLocationInput.disabled = false;
+                    popup.classList.add("hidden");
+                    mapInstructions.style.display = 'block';
+                    map.on('click', handleMapClick);
+                } else {
+                    customLocationField.style.display = 'none';
+                    customLocationInput.disabled = true;
+                    map.off('click', handleMapClick);
+                    
+                    if (customMarker) {
+                        map.removeLayer(customMarker);
+                        customMarker = null;
+                    }
+                    
+                    mapInstructions.style.display = 'none';
+                    confirmButton.style.display = 'none';
+                }
+            });
+        }
+        
+        confirmButton.addEventListener('click', function() {
+            if (!customLatField.value || !customLngField.value) {
+                alert('Please select a location on the map first');
+                return;
+            }
+            
+            popup.classList.remove("hidden");
+            confirmButton.style.display = 'none';
+            mapInstructions.style.display = 'none';
+            map.off('click', handleMapClick);
+            restoreFormData();
+        });
+
+        const eventForm = document.querySelector('#popup-overlay form');
+        if (eventForm) {
+            eventForm.addEventListener('submit', function(e) {
+                if (customLocationSelected) {
+                    const customLocationInput = document.getElementById('id_custom_location');
+                    
+                    if (!customLocationInput.value.trim()) {
+                        e.preventDefault();
+                        customLocationInput.value = '';
+                        customLocationInput.focus(); 
+                        return false;
+                    }
+                    
+                    if (!customLatField.value || !customLngField.value) {
+                        e.preventDefault();
+                        alert('Please select a location on the map first');
+                        popup.classList.add("hidden");
+                        mapInstructions.style.display = 'block';
+                        map.on('click', handleMapClick);
+                        return false;
+                    }
+                }
+            });
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const justRegistered = urlParams.get('just_registered');
+        const registeredEventId = urlParams.get('event_id');
+        
+        const registeredEvents = document.querySelectorAll('#box:nth-of-type(2) .event-item');
+        let justRegisteredEvent = null;
+        
+        registeredEvents.forEach(function(eventItem) {
+            const locationName = eventItem.getAttribute('data-location');
+            const eventId = eventItem.getAttribute('data-event-id');
+            
+            let eventTitle = locationName;
+            const titleElement = eventItem.querySelector('h3');
+            if (titleElement) {
+                eventTitle = titleElement.textContent.trim();
+            }
+            
+            if (justRegistered === 'true' && eventId === registeredEventId) {
+                justRegisteredEvent = eventItem;
+            }
+            
+            if (locationName && gtLocations[locationName]) {
+                addLocationMarker(locationName, eventTitle);
+            } else {
+                const lat = parseFloat(eventItem.getAttribute('data-custom-lat'));
+                const lng = parseFloat(eventItem.getAttribute('data-custom-lng'));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    addLocationMarker(locationName, eventTitle, lat, lng);
+                }
+            }
+        });
+        
+        if (justRegisteredEvent) {
+            const locationName = justRegisteredEvent.getAttribute('data-location');
+            
+            if (locationName && gtLocations[locationName]) {
+                const location = gtLocations[locationName];
+                map.setView([location.lat, location.lng], 17);
+            } else {
+                const lat = parseFloat(justRegisteredEvent.getAttribute('data-custom-lat'));
+                const lng = parseFloat(justRegisteredEvent.getAttribute('data-custom-lng'));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    map.setView([lat, lng], 17);
+                }
+            }
+        } else if (registeredEvents.length > 0) {
+            const firstEvent = registeredEvents[0];
+            const locationName = firstEvent.getAttribute('data-location');
+            
+            if (locationName && gtLocations[locationName]) {
+                const location = gtLocations[locationName];
+                map.setView([location.lat, location.lng], 17);
+            } else {
+                const lat = parseFloat(firstEvent.getAttribute('data-custom-lat'));
+                const lng = parseFloat(firstEvent.getAttribute('data-custom-lng'));
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    map.setView([lat, lng], 17);
+                }
+            }
+        }
+    });
+
+    registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const eventId = document.getElementById('event_id_field').value;
+        const eventItem = document.querySelector(`[data-event-id="${eventId}"]`);
+        
+        if (eventItem) {
+            const locationName = eventItem.getAttribute('data-location');
+            const customLat = eventItem.getAttribute('data-custom-lat');
+            const customLng = eventItem.getAttribute('data-custom-lng');
+
+            let eventTitle = locationName;
+            const titleElement = eventItem.querySelector('h3');
+            if (titleElement) {
+                eventTitle = titleElement.textContent.trim();
+            }
+            
+            if (customLat && customLng) {
+                const lat = parseFloat(customLat);
+                const lng = parseFloat(customLng);
+                
+                L.marker([lat, lng])
+                  .addTo(map)
+                  .bindPopup(eventTitle)
+                  .openPopup();
+                  
+                map.setView([lat, lng], 17);
+            }
+            else if (locationName && gtLocations[locationName]) {
+                addLocationMarker(locationName, eventTitle);
+            }
+        }
+        
+        const submitButton = document.createElement('input');
+        submitButton.type = 'hidden';
+        submitButton.name = 'submit_register';
+        submitButton.value = 'true';
+        registerForm.appendChild(submitButton);
+
+        setTimeout(() => {
+            registerForm.submit();
+        }, 800);
+    });
+
+    closeBtn.addEventListener("click", () => popup.classList.add("hidden"));
+    closeRBtn.addEventListener("click", () => rpopup.classList.add("hidden"));
+    popup.addEventListener("click", (e) => { if (e.target === popup) popup.classList.add("hidden"); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        popup.classList.add("hidden");
+        createdEventsOverlay.classList.add("hidden");
+      }
+    });
     document.getElementById("created-events-button").addEventListener("click", openCreatedEventsPopup);
-
     createdEventsOverlay.addEventListener("click", (e) => {
       if (e.target === createdEventsOverlay) {
         createdEventsOverlay.classList.add("hidden");
@@ -261,6 +594,6 @@
         enableTime: true,
         dateFormat: "Y-m-d H:i",
         time_24hr: false
-      });
+    });
     </script>
 </body>
