@@ -13,8 +13,8 @@ def main_view(request):
     created_events = Event.objects.filter(created_by=request.user)
     events = Event.objects.all()
     registered_events = request.user.registered_events.all()
-    
-    
+
+
     locations_dict = {}
     for location_name in GTLocations.get_location_names():
         location = GTLocations.get_location(location_name)
@@ -24,7 +24,7 @@ def main_view(request):
                 "lng": location["longitude"],
                 "name": location["name"]
             }
-    
+
     locations_json = json.dumps(locations_dict)
 
     if request.method == 'POST':
@@ -38,7 +38,7 @@ def main_view(request):
 
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
-            
+
 
             redirect_url = f"{reverse('main')}?just_registered=true&event_id={event_id}"
             return redirect(redirect_url)
@@ -51,14 +51,14 @@ def main_view(request):
             if form.is_valid() and 'submit_event' in request.POST:
                 cd = form.cleaned_data
                 location_value = cd['location']
-                
+
                 custom_location = request.POST.get('custom_location')
                 custom_lat = request.POST.get('custom_lat')
                 custom_lng = request.POST.get('custom_lng')
-                
+
                 if location_value == "Custom" and custom_location:
                     location_value = custom_location
-                
+
                 event = Event.objects.create(
                     title=cd['title'],
                     description=cd['description'],
@@ -67,12 +67,12 @@ def main_view(request):
                     location=location_value,
                     created_by=request.user
                 )
-                
+
                 if custom_lat and custom_lng:
                     event.custom_lat = float(custom_lat)
                     event.custom_lng = float(custom_lng)
                     event.save()
-                
+
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                     return JsonResponse({'success': True})
                 return redirect('main')
@@ -80,6 +80,35 @@ def main_view(request):
                 print("this is what is happening")
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                     return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        if form.is_valid() and 'submit_event' in request.POST:
+            cd = form.cleaned_data
+            event = Event.objects.create(
+                title=cd['title'],
+                description=cd['description'],
+                start_time=cd['start_time'],
+                end_time=cd['end_time'],
+                location=cd['location'],
+                created_by=request.user
+            )
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+        elif 'submit_register' in request.POST:
+            event_id = request.POST.get('event_id')
+            event = Event.objects.get(id=event_id)
+            registration = Registration.objects.create(
+                user=request.user,
+                event=event,
+            )
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'qr_code_url': registration.qr_code.url
+                })
+        else:
+            print("this is what is happening")
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
     return render(request, 'main/index.html', {
         'form': form,
@@ -117,26 +146,26 @@ def edit_event(request, event_id):
         if form.is_valid():
             cd = form.cleaned_data
             location_value = cd['location']
-            
+
             # Check if custom location was provided
             custom_location = request.POST.get('custom_location')
             custom_lat = request.POST.get('custom_lat')
             custom_lng = request.POST.get('custom_lng')
-            
+
             if location_value == "Custom" and custom_location:
                 location_value = custom_location
-                
+
             event.title = cd['title']
             event.description = cd['description']
             event.start_time = cd['start_time']
             event.end_time = cd['end_time']
             event.location = location_value
-            
+
 
             if custom_lat and custom_lng:
                 event.custom_lat = float(custom_lat)
                 event.custom_lng = float(custom_lng)
-                
+
             event.save()
             return redirect('main')
     else:
