@@ -144,3 +144,6 @@ EMAIL_HOST_USER = 'cs2340project1email@gmail.com'
 EMAIL_HOST_PASSWORD = 'lswa ycel owde sfgh'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

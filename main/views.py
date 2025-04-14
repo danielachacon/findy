@@ -31,13 +31,16 @@ def main_view(request):
         elif 'submit_register' in request.POST:
             event_id = request.POST.get('event_id')
             event = Event.objects.get(id=event_id)
-            Registration.objects.create(
-                user = request.user,
-                event = event,
+            registration = Registration.objects.create(
+                user=request.user,
+                event=event,
             )
-
+            
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': True})
+                return JsonResponse({
+                    'success': True,
+                    'qr_code_url': registration.qr_code.url
+                })
         else:
             print("this is what is happening")
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -48,7 +51,7 @@ def main_view(request):
         'created_events': created_events,
         'events':events,
         'registered_events':registered_events,
-    })
+    })    
 
 @login_required
 def unregister_event(request, event_id):
