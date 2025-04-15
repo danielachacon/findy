@@ -25,6 +25,12 @@ class Event(models.Model):
         blank=True,
     )
 
+    starred_by = models.ManyToManyField(
+        User,
+        related_name='starred_events',
+        blank=True
+    )
+
     def __str__(self):
         return f"{self.title} @ {self.start_time.strftime('%b %d, %Y %I:%M %p')}"
 

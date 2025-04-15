@@ -37,6 +37,18 @@
                           {% if event.custom_lat and event.custom_lng %}
                           data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
                           {% endif %}>
+
+                        <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="star-form">
+                            {% csrf_token %}
+                            <button type="submit" class="star-btn">
+                                {% if request.user in event.starred_by.all %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            </button>
+                        </form>
+
                         <div class="event-info">
                           <h3>{{ event.title }}</h3>
                           <p>
@@ -63,6 +75,18 @@
                         {% if event.custom_lat and event.custom_lng %}
                         data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
                         {% endif %}>
+
+                        <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="star-form">
+                            {% csrf_token %}
+                            <button type="submit" class="star-btn">
+                                {% if request.user in event.starred_by.all %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            </button>
+                        </form>
+
                         <div class="event-info">
                             <h3>{{ event.title }}</h3>
                             <p>
@@ -81,7 +105,46 @@
                     {% endfor %}
                 </ul>
             </div>
-            <div id="box"><h3>Starred Events</h3></div>
+
+            <div id="box"><h3>Starred Events</h3>
+                <ul class="events-list">
+                    {% for event in starred_events %}
+                      <li class="event-item" data-event-id="{{ event.id }}" data-location="{{ event.location }}"
+                          {% if event.custom_lat and event.custom_lng %}
+                          data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
+                          {% endif %}>
+
+                        <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="star-form">
+                            {% csrf_token %}
+                            <button type="submit" class="star-btn">
+                                {% if request.user in event.starred_by.all %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        <div class="event-info">
+                          <h3>{{ event.title }}</h3>
+                          <p>
+                            <strong>When:</strong>
+                            {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                            <strong>Location:</strong> {{ event.location }}
+                          </p>
+
+                                {% if request.user in event.registered_users.all %}
+                                    <button class="register-btn"> Registered </button>
+                                {%  else %}
+                                    <button class="register-btn" onclick="openRPopup('{{ event.id }}'); return false;"> Register </button>
+                                {%  endif %}
+                        </div>
+
+                      </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
             <button id="created-events-button" onclick="openCreatedEventsPopup()">Created Events</button>
             <button id="create-event-button" onclick="openPopup()">+ Create New Event</button>
         </div>
@@ -168,6 +231,7 @@
                   {% if event.custom_lat and event.custom_lng %}
                   data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
                   {% endif %}>
+
                 <div class="event-info">
                   <h3>{{ event.title }}</h3>
                   <p>
