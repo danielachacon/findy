@@ -11,6 +11,7 @@ from django.urls import reverse
 def main_view(request):
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
+    starred_events = Event.objects.filter(starred_by=request.user)
     events = Event.objects.all()
     registered_events = request.user.registered_events.all()
 
@@ -113,6 +114,7 @@ def main_view(request):
     return render(request, 'main/index.html', {
         'form': form,
         'created_events': created_events,
+        'starred_events': starred_events,
         'events': events,
         'registered_events': registered_events,
         'locations_json': locations_json,
@@ -135,6 +137,18 @@ def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id, created_by=request.user)
     if request.method == "POST":
         event.delete()
+    return redirect('main')
+
+@login_required
+def toggle_star_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    if request.method == "POST":
+        if request.user in event.starred_by.all():
+            event.starred_by.remove(request.user)
+        else:
+            event.starred_by.add(request.user)
+
     return redirect('main')
 
 @login_required
