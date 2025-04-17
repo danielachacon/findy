@@ -31,6 +31,10 @@ class Event(models.Model):
         blank=True
     )
 
+    def get_registration_count(self):
+        return self.registered_users.count()
+
+
     def __str__(self):
         return f"{self.title} @ {self.start_time.strftime('%b %d, %Y %I:%M %p')}"
 
