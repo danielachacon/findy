@@ -54,7 +54,8 @@
                           <p>
                             <strong>When:</strong>
                             {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                            <strong>Location:</strong> {{ event.location }}
+                            <strong>Location:</strong> {{ event.location }}<br>
+                              <strong>Number Registered:</strong>{{ event.get_registration_count }}
                           </p>
 
                                 {% if request.user in event.registered_users.all %}
@@ -92,7 +93,8 @@
                             <p>
                                 <strong>When:</strong>
                                 {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                                <strong>Location:</strong> {{ event.location }}
+                                <strong>Location:</strong> {{ event.location }} <br>
+                                <strong>Number Registered:</strong>{{ event.get_registration_count }}
                             </p>
                             <form method="POST" action="{% url 'unregister_event' event.id %}" class="unregister-form">
                                 {% csrf_token %}
@@ -130,7 +132,8 @@
                           <p>
                             <strong>When:</strong>
                             {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                            <strong>Location:</strong> {{ event.location }}
+                            <strong>Location:</strong> {{ event.location }} <br>
+                              <strong>Number Registered:</strong>{{ event.get_registration_count }}
                           </p>
 
                                 {% if request.user in event.registered_users.all %}
