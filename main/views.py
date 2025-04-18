@@ -32,14 +32,23 @@ def main_view(request):
         if 'submit_register' in request.POST:
             event_id = request.POST.get('event_id')
             event = Event.objects.get(id=event_id)
-            Registration.objects.create(
-                user = request.user,
-                event = event,
-            )
+            if event.get_registration_count() < event.max_capacity:
+                registration = Registration.objects.create(
+                    user=request.user,
+                    event=event,
+                )
 
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': True})
-
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'qr_code_url': registration.qr_code.url
+                    })
+            else:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Event is at full capacity.'
+                    })
 
             redirect_url = f"{reverse('main')}?just_registered=true&event_id={event_id}"
             return redirect(redirect_url)
@@ -65,6 +74,7 @@ def main_view(request):
                     description=cd['description'],
                     start_time=cd['start_time'],
                     end_time=cd['end_time'],
+                    max_capacity=cd['max_capacity'],
                     location=location_value,
                     created_by=request.user
                 )
@@ -81,35 +91,47 @@ def main_view(request):
                 print("this is what is happening")
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                     return JsonResponse({'success': False, 'errors': form.errors}, status=400)
-        if form.is_valid() and 'submit_event' in request.POST:
-            cd = form.cleaned_data
-            event = Event.objects.create(
-                title=cd['title'],
-                description=cd['description'],
-                start_time=cd['start_time'],
-                end_time=cd['end_time'],
-                location=cd['location'],
-                created_by=request.user
-            )
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': True})
-        elif 'submit_register' in request.POST:
-            event_id = request.POST.get('event_id')
-            event = Event.objects.get(id=event_id)
-            registration = Registration.objects.create(
-                user=request.user,
-                event=event,
-            )
-
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'qr_code_url': registration.qr_code.url
-                })
-        else:
-            print("this is what is happening")
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        # if form.is_valid() and 'submit_event' in request.POST:
+        #     cd = form.cleaned_data
+        #     event = Event.objects.create(
+        #         title=cd['title'],
+        #         description=cd['description'],
+        #         start_time=cd['start_time'],
+        #         end_time=cd['end_time'],
+        #         max_capacity=cd['max_capacity'],
+        #         location=cd['location'],
+        #         created_by=request.user
+        #     )
+        #     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        #         return JsonResponse({'success': True})
+        # elif 'submit_register' in request.POST:
+        #     event_id = request.POST.get('event_id')
+        #     event = Event.objects.get(id=event_id)
+        #     if event.get_registration_count() < event.max_capacity:
+        #         print(event.get_registration_count())
+        #         print("\n")
+        #         print(event.max_capacity)
+        #         registration = Registration.objects.create(
+        #             user=request.user,
+        #             event=event,
+        #         )
+        #
+        #         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        #             return JsonResponse({
+        #                 'success': True,
+        #                 'qr_code_url': registration.qr_code.url
+        #             })
+        #     else:
+        #         print("failed")
+        #         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        #             return JsonResponse({
+        #                 'success': False,
+        #                 'error': 'Event is at full capacity.'
+        #             })
+        # else:
+        #     print("this is what is happening")
+        #     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        #         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
     return render(request, 'main/index.html', {
         'form': form,
@@ -173,6 +195,7 @@ def edit_event(request, event_id):
             event.description = cd['description']
             event.start_time = cd['start_time']
             event.end_time = cd['end_time']
+            event.max_capacity = cd['max_capacity']
             event.location = location_value
 
 
@@ -188,6 +211,7 @@ def edit_event(request, event_id):
             'description': event.description,
             'start_time': event.start_time,
             'end_time': event.end_time,
+            'max_capacity': event.max_capacity,
             'location': event.location,
         })
 

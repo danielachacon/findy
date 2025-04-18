@@ -20,6 +20,7 @@ class CustomEventForm(forms.Form):
             'placeholder': 'Select end time'
         })
     )
+    max_capacity = forms.IntegerField()
     
     LOCATION_CHOICES = [(location, location) for location in GTLocations.get_location_names()]
 
@@ -38,8 +39,11 @@ class CustomEventForm(forms.Form):
         cleaned_data = super().clean()
         start_time = cleaned_data.get('start_time')
         end_time = cleaned_data.get('end_time')
+        max_capacity = cleaned_data.get('max_capacity')
         if start_time and start_time < timezone.now():
             self.add_error('start_time', 'Start time cannot be in the past.')
         if start_time and end_time and end_time <= start_time:
             self.add_error('start_time', 'Start time must be before end time.')
+        if max_capacity is not None and max_capacity <= 0:
+            self.add_error('max_capacity', 'Max capacity must be greater than 0.')
         return cleaned_data

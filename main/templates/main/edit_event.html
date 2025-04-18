@@ -122,9 +122,26 @@
 
       <label for="id_start_time">Start Time:</label>
       {{ form.start_time }}
+        {% if form.start_time.errors %}
+            <div class="error">
+                {% for error in form.start_time.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
 
       <label for="id_end_time">End Time:</label>
       {{ form.end_time }}
+
+      <label for="id_max_capacity">Max Capacity:</label>
+        {{ form.max_capacity }}
+        {% if form.max_capacity.errors %}
+            <div class="error">
+                {% for error in form.max_capacity.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
 
       <label for="id_location">Location:</label>
       {{ form.location }}
