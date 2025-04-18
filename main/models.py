@@ -12,6 +12,7 @@ class Event(models.Model):
     description = models.TextField()
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    max_capacity = models.PositiveIntegerField(default=100)
     location = models.CharField(max_length=255)
     custom_lat = models.FloatField(null=True, blank=True)
     custom_lng = models.FloatField(null=True, blank=True)
