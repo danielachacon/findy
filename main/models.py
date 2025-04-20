@@ -79,3 +79,16 @@ class Registration(models.Model):
         if self.qr_code:
             self.qr_code.delete(save=False)
         super().delete(*args, **kwargs)
+
+
+class Announcement(models.Model):
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='announcements')
+    message = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Announcement for {self.event.title} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
