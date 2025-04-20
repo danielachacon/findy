@@ -20,7 +20,7 @@
 </head>
 <body>
     <!-- Hidden div to pass location data from Python to JavaScript -->
-    <div id="location-data" data-locations="{{ locations_json }}" style="display: none;"></div>
+    <div id="location-data" data-locations="{{ locations_json }}" class="hidden-data"></div>
     
     <nav class="navbar navbar-dark bg-dark">
       <!-- Navbar content -->
@@ -30,6 +30,7 @@
 
     <div id="second">
         <div id="left">
+            <button id="notifications-button" onclick="openNotificationsPopup()">Notifications</button>
             <div id="box"><h3>Events</h3>
                 <ul class="event-list">
                     {% for event in created_events %}
@@ -158,6 +159,15 @@
         <div id="map"></div>
     </div>
 
+    <div id="notifications-overlay" class="hidden">
+      <div id="notifications-popup">
+        <span class="popup-close" onclick="closeNotificationsPopup()">&times;</span>
+        <h2>Notifications</h2>
+        <ul class="notifications-list">
+        </ul>
+      </div>
+    </div>
+
     <div id="register-popup" class="hidden">
         <div id="popup">
             <span class="popup-close registers">&times;</span>
@@ -265,6 +275,9 @@
                     {% csrf_token %}
                     <button type="submit" class="delete-btn">Delete</button>
                   </form>
+                  <div>
+                    <button type="button" class="announcement-btn" onclick="openAnnouncementPopup('{{ event.id }}')">Announce</button>
+                  </div>
                 </div>
               </li>
             {% endfor %}
@@ -275,7 +288,67 @@
       </div>
     </div>
 
+    <div id="announcement-overlay" class="hidden">
+  <div id="announcement-popup">
+    <span class="popup-close" onclick="closeAnnouncementPopup()">&times;</span>
+    <h2>Make Announcement</h2>
+    <form method="POST" id="announcement-form" action="">
+      {% csrf_token %}
+      <input type="hidden" name="event_id" id="announcement_event_id">
+
+      <div class="form-group">
+        <label for="id_announcement_text">Announcement:</label>
+        <textarea id="id_announcement_text" name="announcement_text" class="form-control" rows="4" placeholder="Type your announcement here..." required></textarea>
+      </div>
+
+      <button type="submit" name="submit_announcement">Send Announcement</button>
+    </form>
+  </div>
+</div>
+
+
     <script>
+const announcementOverlay = document.getElementById("announcement-overlay");
+const announcementForm = document.getElementById("announcement-form");
+
+function openAnnouncementPopup(eventId) {
+  document.getElementById('announcement_event_id').value = eventId;
+  
+  announcementForm.action = "{% url 'make_announcement' 0 %}".replace('0', eventId);
+  createdEventsOverlay.classList.add("hidden");
+  announcementOverlay.classList.remove("hidden");
+}
+
+function closeAnnouncementPopup() {
+  announcementOverlay.classList.add("hidden");
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    popup.classList.add("hidden");
+    createdEventsOverlay.classList.add("hidden");
+    announcementOverlay.classList.add("hidden");
+  }
+});
+
+announcementOverlay.addEventListener("click", (e) => {
+  if (e.target === announcementOverlay) {
+    announcementOverlay.classList.add("hidden");
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  
+  announcementForm.addEventListener('submit', function(e) {
+    const announcementText = document.getElementById('id_announcement_text').value;
+    
+    if (!announcementText.trim()) {
+      e.preventDefault();
+      alert('Please enter an announcement message');
+      return false;
+    }
+  });
+});
     let gtLocations = {};
     try {
         const locationDataElement = document.getElementById('location-data');
@@ -407,32 +480,13 @@
         const confirmButton = document.createElement('button');
         confirmButton.id = 'confirm-location';
         confirmButton.textContent = 'Use This Location';
-        confirmButton.style.position = 'fixed';
-        confirmButton.style.bottom = '20px';
-        confirmButton.style.right = '20px';
-        confirmButton.style.zIndex = '1000';
-        confirmButton.style.padding = '10px 15px';
-        confirmButton.style.backgroundColor = '#003B5C';
-        confirmButton.style.color = 'white';
-        confirmButton.style.border = 'none';
-        confirmButton.style.borderRadius = '5px';
-        confirmButton.style.cursor = 'pointer';
-        confirmButton.style.display = 'none';
+        confirmButton.className = 'confirm-location-button hidden';
         document.body.appendChild(confirmButton);
         
         const mapInstructions = document.createElement('div');
         mapInstructions.id = 'map-instructions';
         mapInstructions.textContent = 'Click on the map to select your custom location';
-        mapInstructions.style.position = 'fixed';
-        mapInstructions.style.top = '80px';
-        mapInstructions.style.left = '50%';
-        mapInstructions.style.transform = 'translateX(-50%)';
-        mapInstructions.style.zIndex = '1000';
-        mapInstructions.style.padding = '10px 15px';
-        mapInstructions.style.backgroundColor = 'rgba(0, 59, 92, 0.8)';
-        mapInstructions.style.color = 'white';
-        mapInstructions.style.borderRadius = '5px';
-        mapInstructions.style.display = 'none';
+        mapInstructions.className = 'map-instructions hidden';
         document.body.appendChild(mapInstructions);
         
         function storeFormData() {
@@ -474,7 +528,7 @@
             customMarker = L.marker([lat, lng]).addTo(map);
             customMarker.bindPopup('Your custom location').openPopup();
             
-            confirmButton.style.display = 'block';
+            confirmButton.classList.remove("hidden");
             confirmButton.disabled = false;
         }
         
@@ -495,7 +549,7 @@
                     customLocationField.style.display = 'block';
                     customLocationInput.disabled = false;
                     popup.classList.add("hidden");
-                    mapInstructions.style.display = 'block';
+                    mapInstructions.classList.remove("hidden");
                     map.on('click', handleMapClick);
                 } else {
                     customLocationField.style.display = 'none';
@@ -507,8 +561,8 @@
                         customMarker = null;
                     }
                     
-                    mapInstructions.style.display = 'none';
-                    confirmButton.style.display = 'none';
+                    mapInstructions.classList.add("hidden");
+                    confirmButton.classList.add("hidden");
                 }
             });
         }
@@ -520,8 +574,8 @@
             }
             
             popup.classList.remove("hidden");
-            confirmButton.style.display = 'none';
-            mapInstructions.style.display = 'none';
+            confirmButton.classList.add("hidden");
+            mapInstructions.classList.add("hidden");
             map.off('click', handleMapClick);
             restoreFormData();
         });
@@ -543,7 +597,7 @@
                         e.preventDefault();
                         alert('Please select a location on the map first');
                         popup.classList.add("hidden");
-                        mapInstructions.style.display = 'block';
+                        mapInstructions.classList.remove("hidden");
                         map.on('click', handleMapClick);
                         return false;
                     }
@@ -664,6 +718,8 @@
       if (e.key === "Escape") {
         popup.classList.add("hidden");
         createdEventsOverlay.classList.add("hidden");
+        announcementOverlay.classList.add("hidden");
+        notificationsOverlay.classList.add("hidden");
       }
     });
     document.getElementById("created-events-button").addEventListener("click", openCreatedEventsPopup);
@@ -678,5 +734,64 @@
         dateFormat: "Y-m-d H:i",
         time_24hr: false
     });
+
+    const notificationsOverlay = document.getElementById("notifications-overlay");
+    const notificationsContainer = document.getElementById("notifications-popup").querySelector(".notifications-list");
+
+    function openNotificationsPopup() {
+
+      notificationsContainer.innerHTML = '<div class="loading">Loading notifications...</div>';
+      notificationsOverlay.classList.remove("hidden");
+      
+      fetch("{% url 'notifications' %}", {
+        method: "GET",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          notificationsContainer.innerHTML = '';
+          
+          if (data.notifications.length === 0) {
+            notificationsContainer.innerHTML = '<div class="no-notifications">You have no notifications at this time.</div>';
+          } else {
+            data.notifications.forEach(notification => {
+              const notificationCard = document.createElement('li');
+              notificationCard.className = 'notification-card';
+              
+              notificationCard.innerHTML = `
+                <div class="notification-header">
+                  <div class="notification-event">${notification.event_title}</div>
+                  <div class="notification-date">${notification.created_at}</div>
+                </div>
+                <div class="notification-message">${notification.message}</div>
+              `;
+              
+              notificationsContainer.appendChild(notificationCard);
+            });
+          }
+        } else {
+          notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching notifications:", error);
+        notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
+      });
+    }
+
+    function closeNotificationsPopup() {
+      notificationsOverlay.classList.add("hidden");
+    }
+
+    notificationsOverlay.addEventListener("click", (e) => {
+      if (e.target === notificationsOverlay) {
+        notificationsOverlay.classList.add("hidden");
+      }
+    });
     </script>
 </body>
+</html>

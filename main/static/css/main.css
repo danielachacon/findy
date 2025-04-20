@@ -47,6 +47,7 @@ header {
     font-weight: bold;
 }
 
+#notifications-button,
 #created-events-button,
 #create-event-button {
     background-color: white;
@@ -60,8 +61,10 @@ header {
     cursor: pointer;
     width: 100%;
     transition: background-color 0.2s ease, color 0.2s ease;
+    margin-bottom: 10px;
 }
 
+#notifications-button:hover,
 #created-events-button:hover,
 #create-event-button:hover {
     background-color: #003B5C;
@@ -228,11 +231,20 @@ header {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    width: 150px;
 }
 
-.edit-btn,
-.delete-btn {
-    padding: 6px 10px;
+.event-actions form {
+    margin: 0;
+    width: 100%;
+}
+
+.event-actions > a, 
+.event-actions > button,
+.event-actions > form > button,
+.event-actions > div > button {
+    margin: 0;
+    padding: 8px 10px;
     font-size: 14px;
     border: none;
     border-radius: 4px;
@@ -240,6 +252,31 @@ header {
     text-align: center;
     font-weight: bold;
     cursor: pointer;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+}
+
+.event-actions > div {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.edit-btn,
+.delete-btn,
+.announcement-btn {
+    padding: 8px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
 }
 
 .edit-btn {
@@ -271,6 +308,17 @@ header {
     background-color: #c9302c;
 }
 
+.announcement-btn {
+    background-color: #5cb85c;
+    color: white;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.announcement-btn:hover {
+    background-color: #4cae4c;
+}
+
 .no-events-msg {
     text-align: center;
     color: #666;
@@ -284,6 +332,10 @@ header {
 
 .hidden {
     display: none !important;
+}
+
+.hidden-data {
+    display: none;
 }
 
 @keyframes popupFadeIn {
@@ -341,4 +393,183 @@ header {
 .star-btn:hover {
     transform: scale(1.2);
     transition: transform 0.15s ease-in-out;
+}
+
+#announcement-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#announcement-popup {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+}
+
+#announcement-popup .popup-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+#announcement-popup h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+#announcement-popup textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-family: inherit;
+}
+
+#announcement-popup button {
+    background-color: #003B5C;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#announcement-popup button:hover {
+    background-color: #00254a;
+}
+
+#notifications-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#notifications-popup {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+#notifications-popup .popup-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+#notifications-popup h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.notifications-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-card {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.notification-event {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.notification-date {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.notification-message {
+    padding: 0.5rem 0;
+    border-top: 1px solid #eee;
+}
+
+.no-notifications {
+    text-align: center;
+    padding: 2rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.error {
+    text-align: center;
+    padding: 1rem;
+    color: #d32f2f;
+    background-color: #fbe9e7;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.confirm-location-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 10px 15px;
+    background-color: #003B5C;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.map-instructions {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    padding: 10px 15px;
+    background-color: rgba(0, 59, 92, 0.8);
+    color: white;
+    border-radius: 5px;
 }

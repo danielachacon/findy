@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomEventForm
-from .models import Event, Registration
+from .models import Event, Registration, Announcement
 from django.http import JsonResponse
 from .locations import GTLocations
 import json
 from django.urls import reverse
+from django.contrib import messages
 
 @login_required
 def main_view(request):
@@ -140,7 +141,56 @@ def main_view(request):
         'events': events,
         'registered_events': registered_events,
         'locations_json': locations_json,
+        'announcements': Announcement.objects.filter(event__in=registered_events).order_by('-created_at'),
     })
+
+
+@login_required
+def make_announcement(request, event_id):
+    event = get_object_or_404(Event, id=event_id, created_by=request.user)
+
+    if request.method == 'POST':
+        announcement_text = request.POST.get('announcement_text')
+        if announcement_text:
+            announcement = Announcement.objects.create(
+                event=event,
+                message=announcement_text,
+                created_by=request.user
+            )
+
+            registered_count = event.registered_users.count()
+
+            if registered_count > 0:
+                messages.success(request,
+                                f"Announcement posted successfully. It will be visible to {registered_count} registered attendees.")
+            else:
+                messages.info(request, "Announcement posted successfully, but there are no registered attendees yet.")
+        else:
+            messages.error(request, "Announcement text cannot be empty.")
+    
+    return redirect('main')
+
+
+@login_required
+def notifications_view(request):
+    """
+    Returns notifications for AJAX request to populate the notifications popup
+    """
+    registered_events = request.user.registered_events.all()
+    announcements = Announcement.objects.filter(event__in=registered_events).order_by('-created_at')
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        notifications_data = []
+        for announcement in announcements:
+            notifications_data.append({
+                'event_title': announcement.event.title,
+                'message': announcement.message,
+                'created_at': announcement.created_at.strftime("%b %d, %Y %H:%M"),
+                'created_by': announcement.created_by.username
+            })
+        return JsonResponse({'success': True, 'notifications': notifications_data})
+    
+    return redirect('main')
 
 @login_required
 def unregister_event(request, event_id):
@@ -183,7 +233,7 @@ def edit_event(request, event_id):
             cd = form.cleaned_data
             location_value = cd['location']
 
-            # Check if custom location was provided
+
             custom_location = request.POST.get('custom_location')
             custom_lat = request.POST.get('custom_lat')
             custom_lng = request.POST.get('custom_lng')
