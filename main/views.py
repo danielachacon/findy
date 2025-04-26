@@ -11,6 +11,12 @@ from django.db.models import F
 
 @login_required
 def main_view(request):
+    # Debug prints
+    print(f"\nCurrent user: {request.user.username}")
+    print("All events in database:")
+    for event in Event.objects.all():
+        print(f"- {event.title} (ID: {event.id}, Created by: {event.created_by.username})")
+    
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
     starred_events = Event.objects.filter(starred_by=request.user)
@@ -137,9 +143,9 @@ def main_view(request):
 
     return render(request, 'main/index.html', {
         'form': form,
+        'events': events,  # This should show ALL events to ALL users
         'created_events': created_events,
         'starred_events': starred_events,
-        'events': events,
         'registered_events': registered_events,
         'locations_json': locations_json,
         'announcements': Announcement.objects.filter(event__in=registered_events).order_by('-created_at'),

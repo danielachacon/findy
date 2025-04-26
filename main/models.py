@@ -4,6 +4,7 @@ import uuid
 import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.core.mail import send_mail
 
 User = get_user_model()
 
@@ -46,9 +47,25 @@ class Registration(models.Model):
     class Meta:
         unique_together = ('user', 'event')
 
-    def delete_registration(self):
-        self.delete_qr()
-        self.delete()
+    def delete(self, *args, **kwargs):
+        event = self.event
+        super().delete(*args, **kwargs)
+        
+        first_in_line = event.waitlist_entries.first()
+        if first_in_line:
+            Registration.objects.create(
+                user=first_in_line.user,
+                event=event
+            )
+            first_in_line.delete()
+            
+            send_mail(
+                f'Spot Available in {event.title}',
+                f'A spot has opened up in {event.title} and you have been automatically registered!',
+                'from@example.com',
+                [first_in_line.user.email],
+                fail_silently=True,
+            )
 
     def __str__(self):
         return f"{self.event} @ {self.user.username} : Code: {self.registration_code}"
