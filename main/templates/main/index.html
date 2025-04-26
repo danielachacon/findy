@@ -63,7 +63,22 @@
                                 {% if request.user in event.registered_users.all %}
                                     <button class="register-btn"> Registered </button>
                                 {% elif event.get_registration_count >= event.max_capacity %}
-                                    <button class="register-btn"> Event Full </button>
+                                    {% with is_waitlisted=False %}
+                                        {% for entry in event.waitlist_entries.all %}
+                                            {% if entry.user == request.user %}
+                                                <form method="POST" action="{% url 'leave_waitlist' event.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn">Leave Waitlist</button>
+                                                </form>
+                                            {% endif %}
+                                        {% empty %}
+                                            <form method="POST" action="{% url 'join_waitlist' event.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn">Join Waitlist</button>
+                                            </form>
+                                        {% endfor %}
+                                    {% endwith %}
+                                    <small>Event Full - {{ event.waitlist_entries.count }} on waitlist</small>
                                 {%  else  %}
                                     <button class="register-btn" onclick="openRPopup('{{ event.id }}'); return false;"> Register </button>
                                 {%  endif %}

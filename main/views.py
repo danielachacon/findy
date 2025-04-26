@@ -1,12 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomEventForm
-from .models import Event, Registration, Announcement
+from .models import Event, Registration, Announcement, Waitlist
 from django.http import JsonResponse
 from .locations import GTLocations
 import json
 from django.urls import reverse
 from django.contrib import messages
+from django.db.models import F
 
 @login_required
 def main_view(request):
@@ -266,3 +267,50 @@ def edit_event(request, event_id):
         })
 
     return render(request, 'main/edit_event.html', {'form': form, 'event': event})
+
+@login_required
+def join_waitlist(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    if (event.get_registration_count() < event.max_capacity):
+        messages.warning(request, "Event not at max capacity.")
+        return redirect('main')
+
+    if not Waitlist.objects.filter(event=event, user=request.user).exists():
+        last_position = Waitlist.objects.filter(event=event).order_by('-position').first()
+        new_position = 1 if not last_position else last_position.position + 1
+
+        Waitlist.objects.create(
+            event=event,
+            user=request.user,
+            position=new_position
+        )
+
+        messages.success(request, f"You've been added to the waitlist at position {new_position}")
+    else:
+        messages.warning(request, "You're already on the waitlist for this event")
+
+    return redirect('main')
+
+@login_required
+def leave_waitlist(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    try:
+        waitlist_entry = Waitlist.objects.get(event=event, user=request.user)
+        leaving_position = waitlist_entry.position
+
+        waitlist_entry.delete()
+
+        Waitlist.objects.filter(
+            event=event,
+            position__gt=leaving_position
+        ).update(
+            position=F('position') - 1
+        )
+
+        messages.success(request, f"You've left the waitlist for this event")
+    except Waitlist.DoesNotExist:
+        messages.warning(request, "You're not on the waitlist for this event")
+
+    return redirect('main')

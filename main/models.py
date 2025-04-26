@@ -18,7 +18,6 @@ class Event(models.Model):
     custom_lng = models.FloatField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-
     registered_users = models.ManyToManyField(
         User,
         through='Registration',
@@ -34,7 +33,6 @@ class Event(models.Model):
 
     def get_registration_count(self):
         return self.registered_users.count()
-
 
     def __str__(self):
         return f"{self.title} @ {self.start_time.strftime('%b %d, %Y %I:%M %p')}"
@@ -92,3 +90,15 @@ class Announcement(models.Model):
 
     def __str__(self):
         return f"Announcement for {self.event.title} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+class Waitlist(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='waitlist_entries')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='waitlisted_events')
+    position = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('user', 'event')
+        ordering = ['position']
+
+    def __str__(self):
+        return f"{self.user.username} - #{self.position} for {self.event.title}"

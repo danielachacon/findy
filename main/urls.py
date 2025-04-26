@@ -9,4 +9,6 @@ urlpatterns = [
     path('event/<int:event_id>/star/', views.toggle_star_event, name='toggle_star_event'),
     path('event/<int:event_id>/make_announcement/', views.make_announcement, name='make_announcement'),
     path('notifications/', views.notifications_view, name='notifications'),
+    path('event/<int:event_id>/join-waitlist/', views.join_waitlist, name='join_waitlist'),
+    path('event/<int:event_id>/leave-waitlist/', views.leave_waitlist, name='leave_waitlist'),
 ]

@@ -27,6 +27,6 @@ class CustomUser(AbstractBaseUser):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-
+    
     def __str__(self):
         return self.username
