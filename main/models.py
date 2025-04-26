@@ -79,7 +79,7 @@ class Registration(models.Model):
 
     
     def generate_qr_code(self):
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr = qrcode.QRCode(version=1, box_size=4, border=5)
         data = f"Event: {self.event.title}\nUser: {self.user.username}\nCode: {self.registration_code}"
         qr.add_data(data)
         qr.make(fit=True)

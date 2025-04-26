@@ -116,6 +116,17 @@
                                 <strong>Number Registered:</strong>{{ event.get_registration_count }}<br>
                                 <strong>Max Capacity:</strong>{{ event.max_capacity }}
                             </p>
+                            {% for registration in event.registration_set.all %}
+                                {% if registration.user == request.user and registration.qr_code %}
+                                    <div class="qr-code">
+                                        <img src="http://127.0.0.1:8000{{ registration.qr_code.url }}" 
+                                             alt="Registration QR Code"
+                                             class="qr-code-image">
+                                        <p>Registration Code: {{ registration.registration_code }}</p>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
                             <form method="POST" action="{% url 'unregister_event' event.id %}" class="unregister-form">
                                 {% csrf_token %}
                                 <button type="submit" class="register-btn">Unregister</button>
@@ -283,6 +294,11 @@
                     {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
                     <strong>Location:</strong> {{ event.location }}
                   </p>
+                  <form id="validation-form-{{ event.id }}">
+                    {% csrf_token %}
+                    <input type="text" id="registration_code_{{ event.id }}" placeholder="Enter Registration Code">
+                    <button type="button" onclick="validateRegistrationCode('{{ event.id }}')">Validate</button>
+                  </form>
                 </div>
                 <div class="event-actions">
                   <a href="{% url 'edit_event' event.id %}" class="edit-btn">Edit</a>
@@ -321,5 +337,41 @@
   </div>
 </div>
 <script src="{% static 'js/main.js' %}"></script>
+<script>
+function validateRegistrationCode(eventId) {
+    const code = document.getElementById(`registration_code_${eventId}`).value;
+    const input = document.getElementById(`registration_code_${eventId}`);
+    const form = document.getElementById(`validation-form-${eventId}`);
+    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    const url = "/main/validate-code/" + eventId + "/";
+    console.log('Attempting to fetch from:', url);
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `registration_code=${code}`
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response URL:', response.url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        input.style.backgroundColor = data.is_valid ? '#e8f5e9' : '#ffebee';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        input.style.backgroundColor = '#ffebee';
+    });
+}
+</script>
 </body>
 </html>

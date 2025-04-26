@@ -8,6 +8,7 @@ import json
 from django.urls import reverse
 from django.contrib import messages
 from django.db.models import F
+import uuid
 
 @login_required
 def main_view(request):
@@ -143,9 +144,9 @@ def main_view(request):
 
     return render(request, 'main/index.html', {
         'form': form,
-        'events': events,  # This should show ALL events to ALL users
         'created_events': created_events,
         'starred_events': starred_events,
+        'events': events,
         'registered_events': registered_events,
         'locations_json': locations_json,
         'announcements': Announcement.objects.filter(event__in=registered_events).order_by('-created_at'),
@@ -320,3 +321,38 @@ def leave_waitlist(request, event_id):
         messages.warning(request, "You're not on the waitlist for this event")
 
     return redirect('main')
+
+@login_required
+def validate_event_code(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    message = None
+    is_valid = False
+    
+    if request.method == 'POST':
+        code = request.POST.get('registration_code', '')
+        
+        # Validate UUID format first
+        try:
+            # Try to parse the code as UUID
+            uuid.UUID(code)
+            
+            # If valid UUID, check if it exists
+            try:
+                registration = Registration.objects.get(
+                    event=event,
+                    registration_code=code
+                )
+                message = "Valid registration code!"
+                is_valid = True
+            except Registration.DoesNotExist:
+                message = "Invalid registration code for this event"
+                is_valid = False
+                
+        except ValueError:
+            message = "Invalid code format"
+            is_valid = False
+    
+    return JsonResponse({
+        'message': message,
+        'is_valid': is_valid
+    })

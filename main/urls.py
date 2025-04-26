@@ -11,4 +11,5 @@ urlpatterns = [
     path('notifications/', views.notifications_view, name='notifications'),
     path('event/<int:event_id>/join-waitlist/', views.join_waitlist, name='join_waitlist'),
     path('event/<int:event_id>/leave-waitlist/', views.leave_waitlist, name='leave_waitlist'),
+    path('validate-code/<int:event_id>/', views.validate_event_code, name='validate_event_code'),
 ]
