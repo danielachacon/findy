@@ -13,3 +13,4 @@ venv/
 *.iml
 
 .DS_Store
+media/qr_codes/
