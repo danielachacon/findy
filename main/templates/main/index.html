@@ -33,7 +33,7 @@
             <button id="notifications-button" onclick="openNotificationsPopup()">Notifications</button>
             <div id="box"><h3>Events</h3>
                 <ul class="event-list">
-                    {% for event in created_events %}
+                    {% for event in events %}
                       <li class="event-item" data-event-id="{{ event.id }}" data-location="{{ event.location }}" 
                           {% if event.custom_lat and event.custom_lng %}
                           data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
@@ -68,7 +68,7 @@
                                             {% if entry.user == request.user %}
                                                 <form method="POST" action="{% url 'leave_waitlist' event.id %}">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="btn">Leave Waitlist</button>
+                                                    <button type="submit" class="btn">Leave Waitlist ({{ entry.position }})</button>
                                                 </form>
                                             {% endif %}
                                         {% empty %}
