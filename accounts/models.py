@@ -39,4 +39,5 @@ class CustomUser(AbstractUser):
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
+        if not UserProfile.objects.filter(user=instance).exists():
+            UserProfile.objects.create(user=instance)
