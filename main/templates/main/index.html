@@ -156,53 +156,73 @@
         <div id="left" class="w-1/3 bg-white p-4 shadow-md overflow-y-auto h-screen pb-24">
           <div id="box" class="mb-4">
             <h3 class="text-lg font-bold mb-2">Events</h3>
-            <details>
+            <details {% if events_open %}open{% endif %}>
               <summary class="cursor-pointer">View All Events</summary>
+
+                <button
+                    id="search-events-button"
+                    class="mt-2 w-full bg-[#B3A369] hover:bg-[#9E8C4A] text-white py-2 px-4 rounded-md transition-colors duration-200"
+                    onclick="openSearchEventsOverlay()"
+                >
+                    Search Events
+                </button>
+
+            <button
+                id="reset-search-button"
+                class="mt-2 w-full bg-[#B3A369] hover:bg-[#9E8C4A] text-white py-2 px-4 rounded-md transition-colors duration-200"
+                onclick="showAllEvents()"
+            >
+                Reset Search
+            </button>
+
               <ul class="space-y-4">
-                {% for event in created_events %}
-                <li class="event-item relative px-4 py-2 bg-gray-100 rounded shadow" data-event-id="{{ event.id }}" data-location="{{ event.location }}">
-                  <div class="flex justify-between items-start">
-                    <h3 class="text-lg font-bold mt-0">{{ event.title }}</h3>
-                    <form method="POST" action="{% url 'toggle_star_event' event.id %}">
-                      {% csrf_token %}
-                      <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
-                        {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
-                      </button>
-                    </form>
-                  </div>
-          
-                  <p class="text-sm text-gray-600 mt-1">
-                    <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                    <strong>Location:</strong> {{ event.location }}<br>
-                    <strong>Number Registered:</strong> {{ event.get_registration_count }}<br>
-                    <strong>Max Capacity:</strong> {{ event.max_capacity }}
-                  </p>
-          
-                  {% if request.user in event.registered_users.all %}
-                  <button class="bg-green-500 text-white py-1 px-3 rounded mt-2">Registered</button>
-                  {% elif event.get_registration_count >= event.max_capacity %}
-                    {% with is_waitlisted=False %}
-                      {% for entry in event.waitlist_entries.all %}
-                        {% if entry.user == request.user %}
-                        <form method="POST" action="{% url 'leave_waitlist' event.id %}">
-                          {% csrf_token %}
-                          <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Leave Waitlist ({{ entry.position }})</button>
+                  {% for event in events %}
+                  <li class="event-item relative px-4 py-2 bg-gray-100 rounded shadow" data-event-id="{{ event.id }}" data-location="{{ event.location }}">
+                    <div class="flex justify-between items-start">
+                      <h3 class="text-lg font-bold mt-0">{{ event.title }}</h3>
+                      <form method="POST" action="{% url 'toggle_star_event' event.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <input type="hidden" name="search_params" value="{{ request.GET.urlencode }}">
+                            <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
+                                {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
+                            </button>
                         </form>
-                        {% endif %}
-                      {% empty %}
-                        <form method="POST" action="{% url 'join_waitlist' event.id %}">
-                          {% csrf_token %}
-                          <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Join Waitlist</button>
-                        </form>
-                      {% endfor %}
-                    {% endwith %}
-                  <p class="text-xs text-gray-600 mt-1">Event Full – {{ event.waitlist_entries.count }} on waitlist</p>
-                  {% else %}
-                  <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
-                  {% endif %}
-                </li>
-                {% endfor %}
-              </ul>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mt-1">
+                      <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                      <strong>Location:</strong> {{ event.location }}<br>
+                      <strong>Number Registered:</strong> {{ event.get_registration_count }}<br>
+                      <strong>Max Capacity:</strong> {{ event.max_capacity }}
+                    </p>
+
+                    {% if request.user in event.registered_users.all %}
+                    <button class="bg-green-500 text-white py-1 px-3 rounded mt-2">Registered</button>
+                    {% elif event.get_registration_count >= event.max_capacity %}
+                      {% with is_waitlisted=False %}
+                        {% for entry in event.waitlist_entries.all %}
+                          {% if entry.user == request.user %}
+                          <form method="POST" action="{% url 'leave_waitlist' event.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Leave Waitlist ({{ entry.position }})</button>
+                          </form>
+                          {% endif %}
+                        {% empty %}
+                          <form method="POST" action="{% url 'join_waitlist' event.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Join Waitlist</button>
+                          </form>
+                        {% endfor %}
+                      {% endwith %}
+                    <p class="text-xs text-gray-600 mt-1">Event Full – {{ event.waitlist_entries.count }} on waitlist</p>
+                    {% else %}
+                    <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+
             </details>
           </div>
 
@@ -219,8 +239,10 @@
                             
                             <div class="flex justify-between items-start">
                                 <h3 class="text-lg font-bold">{{ event.title }}</h3>
-                                <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="ml-2">
+                                <form method="POST" action="{% url 'toggle_star_event' event.id %}">
                                     {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <input type="hidden" name="search_params" value="{{ request.GET.urlencode }}">
                                     <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
                                         {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
                                     </button>
@@ -271,11 +293,13 @@
                     <div class="flex justify-between items-start">
                       <h3 class="text-lg font-bold mt-0">{{ event.title }}</h3>
                       <form method="POST" action="{% url 'toggle_star_event' event.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
-                          {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
-                        </button>
-                      </form>
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <input type="hidden" name="search_params" value="{{ request.GET.urlencode }}">
+                            <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
+                                {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
+                            </button>
+                        </form>
                     </div>
             
                     <p class="text-sm text-gray-600 mt-1">
@@ -433,6 +457,93 @@
           {% endif %}
         </div>
       </div>
+
+    <div id="search-events-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
+        <div class="modal w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <button type="button" onclick="closeSearchEventsOverlay()" class="absolute top-4 right-4 z-50 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
+            <h2 class="text-3xl font-bold text-[#003057] text-center mb-6">Search for Events</h2>
+
+            <form method="GET" action="{% url 'event_search' %}" class="space-y-6">
+                {% csrf_token %}
+                <div>
+                    <label for="event_title" class="block text-sm font-medium text-gray-700">Event Title</label>
+                    <input
+                        type="text"
+                        id="event_title"
+                        name="event_title"
+                        value="{{ form.event_title.value }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B3A369] focus:border-[#B3A369]"
+                    />
+                </div>
+
+                <div>
+                    <label for="start_time_min" class="block text-sm font-medium text-gray-700">Start Time (Min)</label>
+                    <input
+                        type="datetime-local"
+                        id="start_time_min"
+                        name="start_time_min"
+                        value="{{ form.start_time_min.value }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B3A369] focus:border-[#B3A369]"
+                    />
+                </div>
+
+                <div>
+                    <label for="end_time_max" class="block text-sm font-medium text-gray-700">End Time (Max)</label>
+                    <input
+                        type="datetime-local"
+                        id="end_time_max"
+                        name="end_time_max"
+                        value="{{ form.end_time_max.value }}"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B3A369] focus:border-[#B3A369]"
+                    />
+                </div>
+
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                    <select
+                        id="location"
+                        name="location"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B3A369] focus:border-[#B3A369]"
+                    >
+                        <option value="">All Locations</option>
+                        {% for key, value in form.location.field.choices %}
+                            <option value="{{ key }}" {% if key == form.location.value %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="is_full" class="block text-sm font-medium text-gray-700">Event Status</label>
+                    <select
+                        id="is_full"
+                        name="is_full"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#B3A369] focus:border-[#B3A369]"
+                    >
+                        <option value="">All Events</option>
+                        <option value="False" {% if form.is_full.value == 'False' %}selected{% endif %}>Only Not Full</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-center gap-4 mt-6">
+                    <button
+                        type="submit"
+                        class="bg-[#003057] hover:bg-[#002240] text-white py-2 px-6 rounded-md shadow transition duration-200"
+                    >
+                        Search
+                    </button>
+                    <button
+                        type="button"
+                        onclick="closeSearchEventsOverlay()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-md shadow transition duration-200"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
 
       <div id="announcement-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
         <div class="modal w-full max-w-md relative">

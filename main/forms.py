@@ -4,6 +4,31 @@ from .models import Event
 from .locations import GTLocations
 from django.utils import timezone
 
+class EventSearchForm(forms.Form):
+    event_title = forms.CharField(max_length=100, required=False)
+
+    start_time_min = forms.DateTimeField(
+        required=False,
+        widget=forms.TextInput(attrs={'type': 'datetime-local'})
+    )
+    end_time_max = forms.DateTimeField(
+        required=False,
+        widget=forms.TextInput(attrs={'type': 'datetime-local'})
+    )
+
+    location = forms.ChoiceField(
+        choices=[('', 'All Locations')] + [(key, value) for key, value in GTLocations._locations.items()],
+        required=False
+    )
+
+    is_full = forms.ChoiceField(
+        choices=[
+            ('', 'All Events'),
+            ('False', 'Only Not Full')
+        ],
+        required=False
+    )
+
 class CustomEventForm(ModelForm):
     class Meta:
         model = Event

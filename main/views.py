@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CustomEventForm
+from .forms import CustomEventForm, EventSearchForm
 from .models import Event, Registration, Announcement, Waitlist
 from django.http import JsonResponse
 from .locations import GTLocations
@@ -182,6 +182,7 @@ def delete_event(request, event_id):
         event.delete()
     return redirect('main')
 
+
 @login_required
 def toggle_star_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -191,6 +192,17 @@ def toggle_star_event(request, event_id):
             event.starred_by.remove(request.user)
         else:
             event.starred_by.add(request.user)
+
+        # Get the 'next' parameter from the form
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER', reverse('main')))
+
+        # If there are search parameters, add them back to the redirect URL
+        search_params = request.POST.get('search_params')
+        if search_params:
+            next_url = f"{next_url}?{search_params}"
+
+        # Redirect to the 'next' URL with the query parameters intact
+        return redirect(next_url)
 
     return redirect('main')
 
@@ -343,3 +355,42 @@ def create_event_view(request):
         'form': form,
         'show_create_modal': show_modal
     })
+
+@login_required
+def event_search(request):
+    form = EventSearchForm(request.GET or None)
+    registered_events = request.user.registered_events.all()
+    starred_events = request.user.starred_events.all()
+    events = Event.objects.all()
+
+    if form.is_valid():
+        event_title = form.cleaned_data.get('event_title')
+        start_time_min = form.cleaned_data.get('start_time_min')
+        end_time_max = form.cleaned_data.get('end_time_max')
+        location = form.cleaned_data.get('location')
+        is_full = form.cleaned_data.get('is_full')
+
+        if event_title:
+            events = events.filter(title__icontains=event_title)
+
+        if start_time_min:
+            events = events.filter(start_time__gte=start_time_min)
+
+        if end_time_max:
+            events = events.filter(end_time__lte=end_time_max)
+
+        if location:
+            events = events.filter(location=location)
+
+        if is_full == 'False':
+            events = [event for event in events if not event.is_full()]
+
+    context = {
+        'form': form,
+        'events': events,
+        'registered_events': registered_events,
+        'starred_events': starred_events,
+        'events_open': True
+    }
+
+    return render(request, 'main/index.html', context)

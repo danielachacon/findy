@@ -64,6 +64,18 @@ function closeCreateEventModal() {
     toggleOverlay('create-event-modal', false);
 }
 
+function openSearchEventsOverlay() {
+    document.getElementById('search-events-overlay').classList.remove('hidden');
+}
+
+function closeSearchEventsOverlay() {
+    document.getElementById('search-events-overlay').classList.add('hidden');
+}
+
+function showAllEvents() {
+    window.location.href = '/main';  // Directly redirect to /main
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("created-events-button")?.addEventListener("click", openCreatedEventsOverlay);
     document.getElementById("create-event-button")?.addEventListener("click", openCreateEventModal);
