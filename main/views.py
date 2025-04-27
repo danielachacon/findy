@@ -14,12 +14,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def main_view(request):
-    # Debug prints
-    print(f"\nCurrent user: {request.user.username}")
-    print("All events in database:")
-    for event in Event.objects.all():
-        print(f"- {event.title} (ID: {event.id}, Created by: {event.created_by.username})")
-
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
     starred_events = Event.objects.filter(starred_by=request.user, end_time__gte=now())
@@ -68,8 +62,6 @@ def main_view(request):
 
         else:
             form = CustomEventForm(request.POST)
-            print(form.is_valid())
-            print(form.errors)
 
             if form.is_valid() and 'submit_event' in request.POST:
                 cd = form.cleaned_data
@@ -101,7 +93,6 @@ def main_view(request):
                     return JsonResponse({'success': True})
                 return redirect('main')
             else:
-                print("this is what is happening")
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                     return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
@@ -140,7 +131,6 @@ def make_announcement(request, event_id):
                 messages.info(request, "Announcement posted successfully, but there are no registered attendees yet.")
         else:
             messages.error(request, "Announcement text cannot be empty.")
-    
     return redirect('main')
 
 
@@ -162,7 +152,7 @@ def notifications_view(request):
                 'created_by': announcement.created_by.username
             })
         return JsonResponse({'success': True, 'notifications': notifications_data})
-    
+    print('notifications')
     return redirect('main')
 
 @login_required

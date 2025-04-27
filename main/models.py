@@ -108,6 +108,7 @@ class Announcement(models.Model):
     message = models.TextField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
     created_at = models.DateTimeField(auto_now_add=True)
+    dismissed = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']
