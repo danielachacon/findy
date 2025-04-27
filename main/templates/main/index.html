@@ -7,6 +7,7 @@
     <title>{% block title %}Findy - Georgia Tech Events{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
          crossorigin=""/>
@@ -24,6 +25,84 @@
             margin: 0;
             overflow: auto;
             overscroll-behavior: none;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        nav {
+            background: linear-gradient(90deg, #003057, #00509E);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        nav h1 {
+            font-size: 1.5rem;
+        }
+
+        nav button {
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        nav button:hover {
+            transform: scale(1.05);
+        }
+
+        .event-item {
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        .event-item:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+        }
+
+        .modal button {
+            transition: background-color 0.3s ease;
+        }
+
+        .modal button:hover {
+            /* background-color: #002240; */
+        }
+
+        .bg-gray-100 {
+            background: #f9fafb;
+        }
+
+        .bg-gray-800 {
+            background: #2d3748;
+        }
+
+        .bg-color-003057 {
+            background: #003057;
+        }
+
+        .bg-color-B3A369 {
+            background: #B3A369;
+        }
+
+        .rounded {
+            border-radius: 0.5rem;
+        }
+
+        .shadow {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .transition {
+            transition: all 0.3s ease;
+        }
+
+        .hover\:bg-color-002240:hover {
+            background: #002240;
+        }
+
+        .hover\:bg-color-9E8C4A:hover {
+            background: #9E8C4A;
         }
 
         #create-event-overlay, #created-events-overlay, #announcement-overlay {
@@ -40,8 +119,8 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold">Findy</h1>
             <div class="flex space-x-4">
-                <button id="notifications-button" class="bg-[#B3A369] hover:bg-[#9E8C4A] text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300" onclick="openNotificationsPopup()">Notifications</button>
-                <button id="profile-button" class="bg-[#B3A369] hover:bg-[#9E8C4A] text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300" onclick="window.location.href='/userprofile/profile/'">Profile</button>
+                <button id="notifications-button" class="bg-color-B3A369 hover:bg-color-9E8C4A text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300" onclick="openNotificationsPopup()">Notifications</button>
+                <button id="profile-button" class="bg-color-B3A369 hover:bg-color-9E8C4A text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300" onclick="window.location.href='/userprofile/profile/'">Profile</button>
             </div>
         </div>
     </nav>
@@ -90,7 +169,7 @@
                           {% endwith %}
                           <p class="text-xs text-gray-600 mt-1">Event Full – {{ event.waitlist_entries.count }} on waitlist</p>
                         {% else %}
-                          <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
+                          <button class="bg-color-003057 hover:bg-color-002240 text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
                         {% endif %}
                       </div>
                     </li>
@@ -158,7 +237,7 @@
                     <summary class="cursor-pointer">View Starred Events</summary>
                     <ul class="space-y-4">
                         {% for event in starred_events %}
-                        <li class="p-4 bg-gray-100 rounded shadow">
+                        <li class="event-item p-4 bg-gray-100 rounded shadow">
                             <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="inline-block">
                                 {% csrf_token %}
                                 <button type="submit" class="text-yellow-500 mr-2">
@@ -194,7 +273,7 @@
     </div>
 
     <div id="notifications-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
-        <div id="notifications-popup" class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg relative">
+        <div id="notifications-popup" class="modal w-full max-w-md relative">
         <button type="button" onclick="closeNotificationsPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
         <h2 class="text-2xl font-bold text-[#003057] text-center mb-4">Notifications</h2>
         <ul class="notifications-list space-y-2 text-sm text-gray-700">
@@ -210,7 +289,7 @@
     </div>
 
     <div id="create-event-modal" class="{% if show_create_modal %}block{% else %}hidden{% endif %} fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-2xl relative">
+        <div class="modal w-full max-w-2xl relative">
             <button type="button" onclick="closeCreateEventModal()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-3xl font-bold text-[#003057] text-center mb-6">Create a New Event</h2>
             <form method="POST" action="{% url 'create_event' %}">
@@ -271,7 +350,7 @@
     </div>
 
     <div id="created-events-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+        <div class="modal w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
           <button type="button" onclick="closeCreatedEventsOverlay()" class="absolute top-4 right-4 z-50 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
           <h2 class="text-3xl font-bold text-[#003057] text-center mb-6">Your Created Events</h2>
       
@@ -322,7 +401,7 @@
       </div>
 
       <div id="announcement-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
+        <div class="modal w-full max-w-md relative">
           <button type="button" onclick="closeAnnouncementPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">
             &times;
           </button>
@@ -344,7 +423,7 @@
       </div>
 
     <div id="register-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
+        <div class="modal w-full max-w-md relative">
           <button type="button" onclick="closeRegisterPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">
             &times;
           </button>
@@ -361,7 +440,7 @@
       </div>
 
       <div id="unregister-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
+        <div class="modal w-full max-w-md relative">
           <button type="button" onclick="closeUnregisterPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">
             &times;
           </button>
