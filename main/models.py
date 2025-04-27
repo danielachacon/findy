@@ -5,6 +5,8 @@ import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
+from django.utils.timezone import now
+from pytz import timezone
 
 
 User = get_user_model()
@@ -125,4 +127,16 @@ class Waitlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - #{self.position} for {self.event.title}"
-    
+
+class Feedback(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='feedbacks')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='feedbacks')
+    feedback = models.TextField()
+    created_at = models.DateTimeField(default=lambda: now().astimezone(timezone('US/Eastern')))
+
+    class Meta:
+        unique_together = ('user', 'event')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Feedback by {self.user.username} for {self.event.title}"

@@ -682,3 +682,111 @@ if (editingEventId) {
     window.location.href = `/main/events/edit/${editingEventId}/`;
   });
 }
+
+function openEventHistoryPopup() {
+    document.getElementById('event-history-overlay').classList.remove('hidden');
+}
+
+function closeEventHistoryPopup() {
+    document.getElementById('event-history-overlay').classList.add('hidden');
+}
+
+function openFeedbackPopup(eventId) {
+    document.getElementById('feedback_event_id').value = eventId;
+    document.getElementById('feedback-popup').classList.remove('hidden');
+}
+
+function closeFeedbackPopup() {
+    document.getElementById('feedback-popup').classList.add('hidden');
+}
+
+function openViewFeedbackPopup(eventId) {
+    fetch(`/main/get-feedback/${eventId}/`)
+      .then(response => response.json())
+      .then(data => {
+        const feedbackList = document.getElementById('feedback-list');
+        feedbackList.innerHTML = '';
+        if (data.success) {
+          data.feedbacks.forEach(feedback => {
+            const li = document.createElement('li');
+            li.className = 'bg-gray-100 p-4 rounded shadow';
+            li.innerHTML = `<p><strong>${feedback.user}:</strong> ${feedback.text}</p><p class='text-sm text-gray-500'>${feedback.created_at}</p>`;
+            feedbackList.appendChild(li);
+          });
+        } else {
+          feedbackList.innerHTML = '<li class="text-gray-500 italic">No feedback available.</li>';
+        }
+        document.getElementById('view-feedback-popup').classList.remove('hidden');
+      });
+  }
+
+  function closeViewFeedbackPopup() {
+    document.getElementById('view-feedback-popup').classList.add('hidden');
+  }
+
+const notificationsOverlay = document.getElementById("notifications-overlay");
+const notificationsContainer = document.getElementById("notifications-popup").querySelector(".notifications-list");
+
+function openNotificationsPopup() {
+    notificationsContainer.innerHTML = '<div class="loading">Loading notifications...</div>';
+    notificationsOverlay.classList.remove("hidden");
+
+    fetch("{% url 'notifications' %}", {
+        method: "GET",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            notificationsContainer.innerHTML = '';
+            if (data.notifications.length === 0) {
+                notificationsContainer.innerHTML = '<div class="no-notifications">You have no notifications at this time.</div>';
+            } else {
+                data.notifications.forEach(notification => {
+                    const notificationCard = document.createElement('li');
+                    notificationCard.className = 'notification-card';
+                    notificationCard.innerHTML = `
+                            <div class="notification-header">
+                                <div class="notification-event">${notification.event_title}</div>
+                                <div class="notification-date">${notification.created_at}</div>
+                            </div>
+                            <div class="notification-message">${notification.message}</div>
+                        `;
+                    notificationsContainer.appendChild(notificationCard);
+                });
+            }
+        } else {
+            notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching notifications:", error);
+        notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
+    });
+}
+
+function closeNotificationsPopup() {
+    notificationsOverlay.classList.add("hidden");
+}
+
+notificationsOverlay.addEventListener("click", (e) => {
+    if (e.target === notificationsOverlay) {
+        notificationsOverlay.classList.add("hidden");
+    }
+});
+
+function openAnnouncementPopup(eventId) {
+    console.log(eventId);
+    document.getElementById('announcement_event_id').value = eventId;
+    var form = document.getElementById('announcement-form');
+    form.action = "/main/event/" + eventId + "/make_announcement/";
+
+    toggleOverlay('announcement-overlay', true);
+}
+
+function closeAnnouncementPopup() {
+    toggleOverlay('announcement-overlay', false);
+}

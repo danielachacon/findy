@@ -17,5 +17,7 @@ urlpatterns = [
     path('event/<int:event_id>/leave-waitlist/', views.leave_waitlist, name='leave_waitlist'),
     path('validate-code/<int:event_id>/', views.validate_event_code, name='validate_event_code'),
     path('userprofile/', include('userprofile.urls')),
-    path('search/', views.event_search, name='event_search')
+    path('search/', views.event_search, name='event_search'),
+    path('leave-feedback/', views.leave_feedback, name='leave_feedback'),
+    path('get-feedback/<int:event_id>/', views.get_feedback, name='get_feedback'),
 ]

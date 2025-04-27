@@ -139,6 +139,10 @@
               <i data-lucide="user" class="w-6 h-6"></i>
             </button>
           </form>
+
+          <button id="event-history-button" class="text-white hover:text-[#B3A369] transition p-2 rounded-full" onclick="openEventHistoryPopup()" aria-label="Event History">
+            <i data-lucide="clock" class="w-6 h-6"></i>
+          </button>
         
           <form method="POST" action="{% url 'logout' %}" onsubmit="return confirm('Are you sure you want to log out?')">
             {% csrf_token %}
@@ -447,7 +451,10 @@
                   {% csrf_token %}
                   <button type="submit" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded">Delete</button>
                 </form>
-                <button type="button" class="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded" onclick="openAnnouncementPopup({{ event.id }})">Announce</button>
+                <button type="button" class="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded" onclick="openAnnouncementPopup('{{ event.id }}')">Announce</button>
+                {% if event.end_time < now %}
+                <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded" onclick="openViewFeedbackPopup('{{ event.id }}')">View Feedback</button>
+                {% endif %}
               </div>
             </li>
             {% endfor %}
@@ -601,6 +608,52 @@
         </div>
       </div>
 
+    <div id="event-history-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
+        <div class="modal w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <button type="button" onclick="closeEventHistoryPopup()" class="absolute top-4 right-4 z-50 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
+            <h2 class="text-3xl font-bold text-[#003057] text-center mb-6">Event History</h2>
+
+            <ul class="space-y-4">
+                {% for event in past_events %}
+                <li class="event-item relative px-4 py-2 bg-gray-100 rounded shadow">
+                    <h3 class="text-lg font-bold">{{ event.title }}</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                        <strong>Location:</strong> {{ event.location }}
+                    </p>
+                    {% if request.user in event.registered_users.all and not event.has_feedback %}
+                    <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openFeedbackPopup('{{ event.id }}')">Leave Feedback</button>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div id="feedback-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
+        <div class="modal w-full max-w-md relative">
+            <button type="button" onclick="closeFeedbackPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
+            <h2 class="text-2xl font-bold text-[#003057] text-center mb-4">Leave Feedback</h2>
+            <form method="POST" action="{% url 'leave_feedback' %}">
+                {% csrf_token %}
+                <input type="hidden" name="event_id" id="feedback_event_id">
+                <textarea name="feedback" rows="4" class="w-full border border-gray-300 rounded-md p-2" placeholder="Write your feedback here..." required></textarea>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="bg-[#003057] hover:bg-[#002240] text-white py-2 px-4 rounded">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-feedback-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1050]">
+      <div class="modal w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+        <button type="button" onclick="closeViewFeedbackPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
+        <h2 class="text-2xl font-bold text-[#003057] text-center mb-4">Feedback for Event</h2>
+        <ul id="feedback-list" class="space-y-4">
+        </ul>
+      </div>
+    </div>
+
     <script>
         lucide.createIcons();
 
@@ -609,75 +662,6 @@
         dateFormat: "Y-m-d H:i",
         time_24hr: false
     });</script>
-    <script>
-        const notificationsOverlay = document.getElementById("notifications-overlay");
-        const notificationsContainer = document.getElementById("notifications-popup").querySelector(".notifications-list");
-
-        function openNotificationsPopup() {
-            notificationsContainer.innerHTML = '<div class="loading">Loading notifications...</div>';
-            notificationsOverlay.classList.remove("hidden");
-
-            fetch("{% url 'notifications' %}", {
-                method: "GET",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    notificationsContainer.innerHTML = '';
-                    if (data.notifications.length === 0) {
-                        notificationsContainer.innerHTML = '<div class="no-notifications">You have no notifications at this time.</div>';
-                    } else {
-                        data.notifications.forEach(notification => {
-                            const notificationCard = document.createElement('li');
-                            notificationCard.className = 'notification-card';
-                            notificationCard.innerHTML = `
-                                    <div class="notification-header">
-                                        <div class="notification-event">${notification.event_title}</div>
-                                        <div class="notification-date">${notification.created_at}</div>
-                                    </div>
-                                    <div class="notification-message">${notification.message}</div>
-                                `;
-                            notificationsContainer.appendChild(notificationCard);
-                        });
-                    }
-                } else {
-                    notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching notifications:", error);
-                notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
-            });
-        }
-
-        function closeNotificationsPopup() {
-            notificationsOverlay.classList.add("hidden");
-        }
-
-        notificationsOverlay.addEventListener("click", (e) => {
-            if (e.target === notificationsOverlay) {
-                notificationsOverlay.classList.add("hidden");
-            }
-        });
-    </script>
-    <script>
-        function openAnnouncementPopup(eventId) {
-            console.log(eventId);
-            document.getElementById('announcement_event_id').value = eventId;
-            var form = document.getElementById('announcement-form');
-            form.action = "/main/event/" + eventId + "/make_announcement/";
-
-            toggleOverlay('announcement-overlay', true);
-        }
-
-        function closeAnnouncementPopup() {
-            toggleOverlay('announcement-overlay', false);
-        }
-    </script>
     <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>
