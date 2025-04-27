@@ -37,6 +37,8 @@ class Event(models.Model):
     def get_registration_count(self):
         return self.registered_users.count()
 
+    def is_full(self):
+        return self.get_registration_count() >= self.max_capacity
 
     def __str__(self):
         return f"{self.title} @ {self.start_time.strftime('%b %d, %Y %I:%M %p')}"
