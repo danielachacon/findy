@@ -27,14 +27,13 @@
         }
 
         #create-event-overlay, #created-events-overlay, #announcement-overlay {
-            z-index: 1000; /* Ensure popups are in front of the map */
+            z-index: 1000;
         }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-100 font-roboto h-screen w-screen flex flex-col">
-    <!-- Hidden div to pass location data from Python to JavaScript -->
     <div id="location-data" data-locations="{{ locations_json }}" class="hidden"></div>
     
     <nav class="bg-gray-800 text-white p-4 flex-none">

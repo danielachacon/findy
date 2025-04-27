@@ -532,7 +532,6 @@ function validateRegistrationCode(eventId) {
         });
 }
 
-// Function to handle custom location fields
 function handleCustomLocationFields() {
     const locationSelect = document.getElementById('id_location');
     const customFields = document.getElementById('custom-location-field');
@@ -595,7 +594,6 @@ function handleCustomLocationFields() {
     });
 }
 
-// Initialize custom location fields logic
 document.addEventListener("DOMContentLoaded", handleCustomLocationFields);
 
 document.addEventListener('DOMContentLoaded', function () {

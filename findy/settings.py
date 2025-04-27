@@ -155,3 +155,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 TAILWIND_APP_NAME = 'theme'
+
+LOGOUT_REDIRECT_URL = '/accounts/login/'

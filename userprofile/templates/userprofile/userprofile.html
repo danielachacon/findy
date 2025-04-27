@@ -6,10 +6,8 @@
   <title>Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Optional: Custom styles if you have them -->
   <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
 <body class="bg-[#F5F5F5] min-h-screen">
@@ -46,13 +44,15 @@
       <button onclick="openEditProfileModal()" class="bg-[#003057] hover:bg-[#002240] text-white text-sm font-semibold px-5 py-2 rounded-md transition duration-300 mr-4">
         Edit Profile
       </button>
-      <a href="{% url 'password_change' %}" class="inline-block bg-white text-[#003057] border border-[#003057] hover:bg-[#f0f0f0] text-sm font-semibold px-5 py-2 rounded-md transition duration-300">
+      <a href="{% url 'password_change' %}" class="inline-block bg-white text-[#003057] border border-[#003057] hover:bg-[#f0f0f0] text-sm font-semibold px-5 py-2 rounded-md transition duration-300 mr-4">
         Reset Password
+      </a>
+      <a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to log out?')" class="inline-block bg-red-500 text-white hover:bg-red-600 text-sm font-semibold px-5 py-2 rounded-md transition duration-300">
+        Logout
       </a>
     </div>
   </div>
 
-  <!-- Modal -->
   <div id="edit-profile-modal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center px-4">
     <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-lg relative font-sans">
       <span onclick="closeEditProfileModal()" class="absolute top-4 right-5 text-xl font-bold text-gray-600 cursor-pointer hover:text-gray-800">&times;</span>
