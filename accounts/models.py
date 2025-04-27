@@ -1,7 +1,10 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import UserManager, AbstractUser
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from userprofile.models import UserProfile
 
-class CustomUserManager(BaseUserManager):
+class CustomUserManager(UserManager):
     def create_user(self, email, username, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
@@ -16,10 +19,9 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, username, password, **extra_fields)
 
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=255)
     token = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -28,5 +30,13 @@ class CustomUser(AbstractBaseUser):
 
     USERNAME_FIELD = 'email'
 
+    REQUIRED_FIELDS = ['username']
+
     def __str__(self):
         return self.username
+
+
+@receiver(post_save, sender=CustomUser)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)

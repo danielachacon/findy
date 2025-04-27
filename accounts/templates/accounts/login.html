@@ -1,46 +1,54 @@
 {% extends 'base.html' %}
 
+{% load widget_tweaks %}
+{% load custom_filters %}
+
 {% block title %}Georgia Tech - Login{% endblock %}
 
 {% block container_class %}container-narrow{% endblock %}
 
 {% block content %}
-<h2>Login</h2>
-<form method="POST">
-    {% csrf_token %}
-    <div>
-        <label for="id_username">Email:</label>
-        {{ form.username }}
-        {% if form.username.errors %}
-            <div class="error">
-                {% for error in form.username.errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-
-    <div>
-        <label for="id_password">Password:</label>
-        {{ form.password }}
-        {% if form.password.errors %}
-            <div class="error">
-                {% for error in form.password.errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
-
-    {% if error_message %}
-        <div class="error-message" style="color: red;">
-            {{ error_message }}
+<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Login</h2>
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="id_username" class="block text-sm font-medium text-gray-700">Email:</label>
+            {{ form.username|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+            {% if form.username.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {% for error in form.username.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
 
-    <button type="submit">Login</button>
-</form>
-<div class="form-footer">
-    <p>Don't have an account? <a href="/accounts/register/">Register here</a></p>
+        <div>
+            <label for="id_password" class="block text-sm font-medium text-gray-700">Password:</label>
+            {{ form.password|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+            {% if form.password.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {% for error in form.password.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {% if error_message %}
+            <div class="text-red-500 text-sm mt-1">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Login</button>
+    </form>
+    <div class="text-center mt-4">
+        <p class="text-sm text-gray-600">Don't have an account? <a href="/accounts/register/" class="text-blue-500 hover:underline">Register here</a></p>
+    </div>
+    <div class="text-right mt-1">
+        <a href="{% url 'password_reset' %}" class="text-blue-500 hover:underline">Forgot password?</a>
+    </div>
 </div>
 {% endblock %}

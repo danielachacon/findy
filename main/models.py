@@ -4,6 +4,8 @@ import uuid
 import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.core.mail import send_mail
+
 
 User = get_user_model()
 
@@ -16,7 +18,7 @@ class Event(models.Model):
     location = models.CharField(max_length=255)
     custom_lat = models.FloatField(null=True, blank=True)
     custom_lng = models.FloatField(null=True, blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_events')
     created_at = models.DateTimeField(auto_now_add=True)
 
     registered_users = models.ManyToManyField(
@@ -48,9 +50,25 @@ class Registration(models.Model):
     class Meta:
         unique_together = ('user', 'event')
 
-    def delete_registration(self):
-        self.delete_qr()
-        self.delete()
+    def delete(self, *args, **kwargs):
+        event = self.event
+        super().delete(*args, **kwargs)
+        
+        first_in_line = event.waitlist_entries.first()
+        if first_in_line:
+            Registration.objects.create(
+                user=first_in_line.user,
+                event=event
+            )
+            first_in_line.delete()
+            
+            send_mail(
+                f'Spot Available in {event.title}',
+                f'A spot has opened up in {event.title} and you have been automatically registered!',
+                'from@example.com',
+                [first_in_line.user.email],
+                fail_silently=True,
+            )
 
     def __str__(self):
         return f"{self.event} @ {self.user.username} : Code: {self.registration_code}"
@@ -64,7 +82,7 @@ class Registration(models.Model):
 
     
     def generate_qr_code(self):
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr = qrcode.QRCode(version=1, box_size=4, border=5)
         data = f"Event: {self.event.title}\nUser: {self.user.username}\nCode: {self.registration_code}"
         qr.add_data(data)
         qr.make(fit=True)
@@ -92,3 +110,16 @@ class Announcement(models.Model):
 
     def __str__(self):
         return f"Announcement for {self.event.title} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+class Waitlist(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='waitlist_entries')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='waitlisted_events')
+    position = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('user', 'event')
+        ordering = ['position']
+
+    def __str__(self):
+        return f"{self.user.username} - #{self.position} for {self.event.title}"
+    

@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Optional: Custom styles if you have them -->
+  <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body class="bg-[#F5F5F5] min-h-screen">
+
+  <div class="max-w-2xl mx-auto bg-[#FAF9F7] p-10 rounded-xl shadow-sm mt-12 border border-gray-300 text-[#333] font-serif">
+    <div class="flex items-center space-x-6">
+        {% if profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-[#B3A369] shadow-sm">
+      {% else %}
+      <img src="{% static 'img/default-profile.png' %}" 
+      alt="Default Profile Picture" 
+      class="w-24 h-24 rounded-full border-4 border-[#B3A369] shadow-sm object-cover object-center scale-200">
+      {% endif %}
+      <div>
+        <h2 class="text-4xl font-bold text-gray-800 mb-1">{{ user.username }}</h2>
+        <p class="text-gray-500 text-sm">Joined: {{ profile.joined_date|date:"F d, Y" }}</p>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <h3 class="text-2xl font-semibold text-gray-800 mb-4">Profile Details</h3>
+      <ul class="space-y-2 text-[15px] text-gray-700">
+        <li><strong>Email:</strong> {{ user.email }}</li>
+        <li><strong>Events Attended:</strong> {{ user.registered_events.count }}</li>
+        <li><strong>Starred Events:</strong> {{ user.starred_events.count }}</li>
+        <li><strong>Events Created:</strong> {{ user.created_events.count }}</li>
+      </ul>
+    </div>
+
+    <div class="mt-10 text-right">
+      <a href="{% url 'main' %}" class="inline-block bg-white text-[#003057] border border-[#003057] hover:bg-[#f0f0f0] text-sm font-semibold px-5 py-2 rounded-md transition duration-300 mr-4">
+        ← Back to Main
+      </a>
+      <button onclick="openEditProfileModal()" class="bg-[#003057] hover:bg-[#002240] text-white text-sm font-semibold px-5 py-2 rounded-md transition duration-300 mr-4">
+        Edit Profile
+      </button>
+      <a href="{% url 'password_change' %}" class="inline-block bg-white text-[#003057] border border-[#003057] hover:bg-[#f0f0f0] text-sm font-semibold px-5 py-2 rounded-md transition duration-300">
+        Reset Password
+      </a>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="edit-profile-modal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center px-4">
+    <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-lg relative font-sans">
+      <span onclick="closeEditProfileModal()" class="absolute top-4 right-5 text-xl font-bold text-gray-600 cursor-pointer hover:text-gray-800">&times;</span>
+      <h2 class="text-2xl font-semibold text-center text-[#003057] mb-6">Edit Profile</h2>
+      <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        {% csrf_token %}
+        <div>
+          <label for="profile_picture" class="block text-sm font-medium text-gray-700">Profile Picture</label>
+          <input type="file" id="profile_picture" name="profile_picture" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-[#B3A369] focus:ring-[#B3A369]">
+        </div>
+
+        <div class="text-right">
+          <button type="submit" class="bg-[#003057] hover:bg-[#002240] text-white font-semibold px-6 py-2 rounded-md transition duration-300">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEditProfileModal() {
+      document.getElementById('edit-profile-modal').classList.remove('hidden');
+    }
+
+    function closeEditProfileModal() {
+      document.getElementById('edit-profile-modal').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>

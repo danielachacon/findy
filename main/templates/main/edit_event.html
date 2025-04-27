@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,424 +7,121 @@
   <title>Edit Event</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-   crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-   crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <style>
-    body {
-      background-color: #f4f4f4;
-      font-family: 'Roboto', Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .edit-container {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      max-width: 450px;
-      width: 100%;
-    }
-
-    h2 {
-      text-align: center;
-      color: #003B5C;
-      margin-bottom: 25px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    label {
-      font-weight: bold;
-      font-size: 14px;
-      color: #003B5C;
-    }
-
-    input,
-    textarea {
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
-    input:focus,
-    textarea:focus {
-      border-color: #003B5C;
-      outline: none;
-    }
-
-    textarea {
-      resize: none;
-      min-height: 80px;
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .btn-row button,
-    .btn-row a {
-      flex: 1;
-      padding: 12px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-    }
-
-    .btn-save {
-      background-color: #003B5C;
-      color: white;
-    }
-
-    .btn-cancel {
-      background-color: #ccc;
-      color: black;
-    }
-
-    .btn-save:hover {
-      background-color: #002744;
-    }
-
-    .btn-cancel:hover {
-      background-color: #bbb;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="edit-container">
-    <h2>Edit Event</h2>
-    <form method="POST">
-      {% csrf_token %}
-      <label for="id_title">Title:</label>
-      {{ form.title }}
+<body class="bg-gray-100 font-roboto min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white px-8 py-10 rounded-2xl shadow-xl w-full max-w-xl h-auto overflow-y-auto">
+    <h2 class="text-center text-2xl sm:text-3xl font-bold text-[#003057] mb-6">Edit Event</h2>
+    <div id="edit-container">
+      <form method="POST" action="{% url 'edit_event' event.id %}" class="space-y-5">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
 
-      <label for="id_description">Description:</label>
-      {{ form.description }}
+        <div class="mb-4">
+            <label for="id_title" class="block text-sm font-medium text-gray-700">Title</label>
+            <input type="text" id="id_title" name="title" class="resize-none mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:border-[#003057] focus:ring-[#003057]" value="{{ form.title.value|default:'' }}">
+            <p class="text-red-500 text-sm mt-1">{{ form.title.errors|join:", " }}</p>
+        </div>
 
-      <label for="id_start_time">Start Time:</label>
-      {{ form.start_time }}
-        {% if form.start_time.errors %}
-            <div class="error">
-                {% for error in form.start_time.errors %}
-                  <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div class="mb-4">
+            <label for="id_description" class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea id="id_description" name="description" rows="3" class="resize-none mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:border-[#003057] focus:ring-[#003057]">{{ form.description.value|default:'' }}</textarea>
+            <p class="text-red-500 text-sm mt-1">{{ form.description.errors|join:", " }}</p>
+        </div>
 
-      <label for="id_end_time">End Time:</label>
-      {{ form.end_time }}
+        <div class="mb-4">
+          <label for="id_start_time" class="block text-sm font-medium text-gray-700">Start Time</label>
+          <input 
+              type="text" 
+              id="id_start_time" 
+              name="start_time" 
+              class="datetimepicker resize-none mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:border-[#003057] focus:ring-[#003057]" 
+              value="{{ form.start_time.value|date:'Y-m-d H:i' }}">
+          <p class="text-red-500 text-sm mt-1">{{ form.start_time.errors|join:", " }}</p>
+        </div>
+        
+        <div class="mb-4">
+            <label for="id_end_time" class="block text-sm font-medium text-gray-700">End Time</label>
+            <input 
+                type="text" 
+                id="id_end_time" 
+                name="end_time" 
+                class="datetimepicker resize-none mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:border-[#003057] focus:ring-[#003057]" 
+                value="{{ form.end_time.value|date:'Y-m-d H:i' }}">
+            <p class="text-red-500 text-sm mt-1">{{ form.end_time.errors|join:", " }}</p>
+        </div>
 
-      <label for="id_max_capacity">Max Capacity:</label>
-        {{ form.max_capacity }}
-        {% if form.max_capacity.errors %}
-            <div class="error">
-                {% for error in form.max_capacity.errors %}
-                  <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div class="mb-4">
+            <label for="id_max_capacity" class="block text-sm font-medium text-gray-700">Max Capacity</label>
+            <input type="number" id="id_max_capacity" name="max_capacity" class="resize-none mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:border-[#003057] focus:ring-[#003057]" value="{{ form.max_capacity.value|default:'' }}">
+            <p class="text-red-500 text-sm mt-1">{{ form.max_capacity.errors|join:", " }}</p>
+        </div>
 
-      <label for="id_location">Location:</label>
-      {{ form.location }}
+        <div class="mb-4">
+          <label for="id_location" class="block text-sm font-medium text-gray-700">Location</label>
+          <select id="id_location" name="location" class="location-select mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:border-[#003057] focus:ring-[#003057]">
+              {% for location in form.fields.location.choices %}
+                  <option value="{{ location.0 }}" {% if form.location.value == location.0 %}selected{% endif %}>{{ location.1 }}</option>
+              {% endfor %}
+          </select>
+        </div>
 
-      <div id="custom-location-field" style="display: none;">
-        <label for="id_custom_location">Custom Location Name:</label>
-        <input type="text" name="custom_location" id="id_custom_location" class="form-control" placeholder="Enter custom location name" required>
-        <input type="hidden" name="custom_lat" id="custom_lat_field" value="{{ event.custom_lat|default:'' }}">
-        <input type="hidden" name="custom_lng" id="custom_lng_field" value="{{ event.custom_lng|default:'' }}">
-      </div>
+        <div id="custom-location-field" class="hidden">
+            <label for="id_custom_location" class="block text-sm font-medium text-gray-700">Custom Location Name</label>
+            <input type="text" id="id_custom_location" name="custom_location" class="mt-1 block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-[#003057] focus:ring-[#003057]" placeholder="Enter custom location name">
+            <input type="hidden" name="custom_lat" id="custom_lat_field">
+            <input type="hidden" name="custom_lng" id="custom_lng_field">
+        </div>
 
-      <div class="btn-row">
-        <button type="submit" href="{% url 'main' %}" class="btn-save">Save Changes</button>
-        <a href="{% url 'main' %}" class="btn-cancel">Cancel</a>
-      </div>
-    </form>
+        <div class="flex gap-4 pt-2">
+          <button type="submit" class="flex-1 bg-[#003057] hover:bg-[#002240] text-white py-2 rounded-md font-semibold transition">Save</button>
+          <a href="{% url 'main' %}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-md font-semibold text-center transition">Cancel</a>
+        </div>
+      </form>
+    </div>
   </div>
-</body>
-<script>
-  
-  let customLocationSelected = false;
-  let map = null;
-  let customMarker = null;
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    const locationDropdown = document.querySelector('[name="location"]');
-    const customLocationField = document.getElementById('custom-location-field');
-    const customLocationInput = document.getElementById('id_custom_location');
-    const customLatField = document.getElementById('custom_lat_field');
-    const customLngField = document.getElementById('custom_lng_field'); 
-    const editContainer = document.querySelector('.edit-container');
-    let formValues = {}; 
-    
-    
-    const confirmButton = document.createElement('button');
-    confirmButton.id = 'confirm-location';
-    confirmButton.textContent = 'Use This Location';
-    confirmButton.style.position = 'fixed';
-    confirmButton.style.bottom = '20px';
-    confirmButton.style.right = '20px';
-    confirmButton.style.zIndex = '1000';
-    confirmButton.style.padding = '10px 15px';
-    confirmButton.style.backgroundColor = '#003B5C';
-    confirmButton.style.color = 'white';
-    confirmButton.style.border = 'none';
-    confirmButton.style.borderRadius = '5px';
-    confirmButton.style.cursor = 'pointer';
-    confirmButton.style.display = 'none';
-    document.body.appendChild(confirmButton);
-    
-    
-    const mapContainer = document.createElement('div');
-    mapContainer.id = 'map-container';
-    mapContainer.style.position = 'fixed';
-    mapContainer.style.top = '0';
-    mapContainer.style.left = '0';
-    mapContainer.style.width = '100%';
-    mapContainer.style.height = '100%';
-    mapContainer.style.zIndex = '999';
-    mapContainer.style.display = 'none';
-    document.body.appendChild(mapContainer);
-    
-    
-    const mapDiv = document.createElement('div');
-    mapDiv.id = 'map';
-    mapDiv.style.width = '100%';
-    mapDiv.style.height = '100%';
-    mapContainer.appendChild(mapDiv);
-    
-    
-    const mapInstructions = document.createElement('div');
-    mapInstructions.id = 'map-instructions';
-    mapInstructions.textContent = 'Click on the map to select your custom location';
-    mapInstructions.style.position = 'fixed';
-    mapInstructions.style.top = '20px';
-    mapInstructions.style.left = '50%';
-    mapInstructions.style.transform = 'translateX(-50%)';
-    mapInstructions.style.zIndex = '1001';
-    mapInstructions.style.padding = '10px 15px';
-    mapInstructions.style.backgroundColor = 'rgba(0, 59, 92, 0.8)';
-    mapInstructions.style.color = 'white';
-    mapInstructions.style.borderRadius = '5px';
-    mapInstructions.style.display = 'none';
-    document.body.appendChild(mapInstructions);
-    
-    
-    function storeFormData() {
-        const form = document.querySelector('form');
-        const formElements = form.elements;
-        for (let i = 0; i < formElements.length; i++) {
-            if (formElements[i].name) {
-                formValues[formElements[i].name] = formElements[i].value;
-            }
-        }
-    }
-    
-    
-    function restoreFormData() {
-        const form = document.querySelector('form');
-        const formElements = form.elements;
-        for (let i = 0; i < formElements.length; i++) {
-            if (formElements[i].name && formValues[formElements[i].name]) {
-                formElements[i].value = formValues[formElements[i].name];
-            }
-        }
-        locationDropdown.value = "Custom";
-        customLocationField.style.display = 'block';
-        customLocationInput.disabled = false;
-        customLocationInput.focus();
-    }
-    
-    
-    function initMap() {
-        if (map) return; 
-        
-        const georgiaTechBounds = L.latLngBounds(
-            L.latLng(33.770, -84.405),
-            L.latLng(33.780, -84.385)
-        );
-        
-        map = L.map('map', {
-            minZoom: 16,
-            maxZoom: 18,
-            maxBounds: georgiaTechBounds,
-            maxBoundsViscosity: 1.0,
-        }).setView([33.7756, -84.3963], 16);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-        
-        const campusBoundary = L.polygon([
-            [33.770, -84.405], // SW corner
-            [33.770, -84.385], // SE corner
-            [33.780, -84.385], // NE corner
-            [33.780, -84.405]  // NW corner
-        ], {
-            color: "#003B5C",  // GT Gold color
-            fillOpacity: 0.05,  // Slight transparency
-            weight: 2
-        }).addTo(map);
-        
 
-        if (customLatField.value && customLngField.value) {
-            const lat = parseFloat(customLatField.value);
-            const lng = parseFloat(customLngField.value);
-            customMarker = L.marker([lat, lng]).addTo(map);
-            customMarker.bindPopup('Your custom location').openPopup();
-            map.setView([lat, lng], 17);
-            confirmButton.style.display = 'block';
-        }
-    }
-    
-    //CUSTOM LOCATION CLICKING
-    function handleMapClick(e) {
-
-        if (customMarker) {
-            map.removeLayer(customMarker);
-        }
-        
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-        
-
-        customLatField.value = lat;
-        customLngField.value = lng;
-        
-
-        customMarker = L.marker([lat, lng]).addTo(map);
-        customMarker.bindPopup('Your custom location').openPopup();
-        
-
-        confirmButton.style.display = 'block';
-        confirmButton.disabled = false;
-    }
-    
-    if (locationDropdown && customLocationField && customLocationInput) {
-      customLocationSelected = locationDropdown.value === "Custom";
-      if (customLocationSelected) {
-        customLocationField.style.display = 'block';
-        customLocationInput.disabled = false;
-      } else {
-        customLocationField.style.display = 'none';
-        customLocationInput.disabled = true;
-      }
-      
-      
-      locationDropdown.addEventListener('change', function() {
-        customLocationSelected = this.value === "Custom";
-        
-        if (customLocationSelected) {
-          storeFormData();
-          
-          
-          customLocationField.style.display = 'block';
-          customLocationInput.disabled = false;
-          
-          
-          editContainer.style.display = 'none';
-          
-          
-          mapContainer.style.display = 'block';
-          mapInstructions.style.display = 'block';
-          
-    
-          initMap();
-          
-  
-          map.on('click', handleMapClick);
-          
-        } else {
-          
-          customLocationField.style.display = 'none';
-          customLocationInput.disabled = true;
-        }
-      });
-    }
-    
-    // Confirm button event handler
-    confirmButton.addEventListener('click', function() {
-      if (!customLatField.value || !customLngField.value) {
-        alert('Please select a location on the map first');
-        return;
-      }
-      
-      //EDGE CASE with custom location being edited with a
-      //new custom location, make sure the new custom location
-      //is displayed on the map
-      formValues['custom_lat'] = customLatField.value;
-      formValues['custom_lng'] = customLngField.value;
-
-      mapContainer.style.display = 'none';
-      mapInstructions.style.display = 'none';
-      confirmButton.style.display = 'none';
-      
-
-      editContainer.style.display = 'block';
-      
-
-      if (map) {
-        map.off('click', handleMapClick);
-      }
-      
- 
-      restoreFormData();
+  <script>
+    flatpickr(".datetimepicker", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      time_24hr: false
     });
-    
 
-    const eventForm = document.querySelector('form');
-    if (eventForm) {
-      eventForm.addEventListener('submit', function(e) {
-        if (customLocationSelected) {
-          const customLocationInput = document.getElementById('id_custom_location');
-          
+    document.addEventListener("DOMContentLoaded", () => {
+    const locationSelect = document.getElementById("id_location");
 
-          if (!customLocationInput.value.trim()) {
-            e.preventDefault();
-            customLocationInput.value = ''; 
-            customLocationInput.focus(); 
-            return false;
-          }
-          
-
-          if (!customLatField.value || !customLngField.value) {
-            e.preventDefault();
-            alert('Please select a location on the map first');
-            
-
-            editContainer.style.display = 'none';
-            
-
-            mapContainer.style.display = 'block';
-            mapInstructions.style.display = 'block';
-            
-            initMap();
-            map.on('click', handleMapClick);
-            
-            return false;
-          }
+    if (locationSelect) {
+      locationSelect.addEventListener("change", () => {
+        if (locationSelect.value === "Custom") {
+          const eventId = window.location.pathname.split("/").filter(Boolean).pop();
+          window.location.href = `/main/?select_custom_for=${eventId}`;
         }
       });
+    }
+
+    // Restore coordinates if selected from main map
+    const eventId = window.location.pathname.split("/").filter(Boolean).pop();
+    const storedLat = localStorage.getItem(`edit_event_${eventId}_lat`);
+    const storedLng = localStorage.getItem(`edit_event_${eventId}_lng`);
+
+    if (storedLat && storedLng) {
+      document.getElementById("custom_lat_field").value = storedLat;
+      document.getElementById("custom_lng_field").value = storedLng;
+      document.getElementById("id_location").value = "Custom";
+      document.getElementById("custom-location-field").classList.remove("hidden");
+      document.getElementById("id_custom_location").disabled = false;
+      document.getElementById("id_custom_location").focus();
+
+      localStorage.removeItem(`edit_event_${eventId}_lat`);
+      localStorage.removeItem(`edit_event_${eventId}_lng`);
     }
   });
-</script>
+  </script>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
 </html>

@@ -3,9 +3,11 @@
 {% block title %}Account Activation{% endblock %}
 
 {% block content %}
-<h1>Welcome, {{ user.username }}!</h1>
-<p>Thank you for registering.</p>
-<p>To activate your account, please check your inbox at <strong>{{ user.email }}</strong> and click the link we sent you.</p>
-<p>Once you've activated your account, click below to log in:</p>
-<a href="{{ login_url }}" class="btn">Login</a>
+<div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md mt-10 text-center">
+    <h1 class="text-2xl font-bold text-blue-900 mb-4">Welcome, {{ user.username }}!</h1>
+    <p class="text-base leading-6 mb-4">Thank you for registering.</p>
+    <p class="text-base leading-6 mb-4">To activate your account, please check your inbox at <strong class="text-gray-800">{{ user.email }}</strong> and click the link we sent you.</p>
+    <p class="text-base leading-6 mb-4">Once you've activated your account, click below to log in:</p>
+    <a href="{{ login_url }}" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Login</a>
+</div>
 {% endblock %}
