@@ -4,7 +4,6 @@ from . import views
 
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
 

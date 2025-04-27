@@ -1,8 +1,11 @@
 from django.urls import include, path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.main_view, name='main'),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('create-event/', views.create_event_view, name='create_event'),
     path('events/edit/<int:event_id>/', views.edit_event, name='edit_event'),
     path('events/delete/<int:event_id>/', views.delete_event, name='delete_event'),

@@ -110,114 +110,144 @@
         }
     </style>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-100 font-roboto h-screen w-screen flex flex-col">
     <div id="location-data" data-locations="{{ locations_json }}" class="hidden"></div>
     
-    <nav class="bg-gray-800 text-white p-4 flex-none">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">Findy</h1>
-            <div class="flex space-x-4">
-                <button id="notifications-button" class="bg-color-B3A369 hover:bg-color-9E8C4A text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300" onclick="openNotificationsPopup()">Notifications</button>
-                <button id="profile-button" class="bg-color-B3A369 hover:bg-color-9E8C4A text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300" onclick="window.location.href='/userprofile/profile/'">Profile</button>
-            </div>
+    <nav class="bg-gray-800 text-white px-6 py-4 shadow-md sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <img src="{% static 'img/buzz.png' %}" alt="Logo" class="w-8 h-8">
+          <h1 class="text-2xl font-extrabold tracking-tight text-[#B3A369]">Findy</h1>
         </div>
+    
+        <div class="flex items-center space-x-4">
+          <button id="notifications-button"
+            class="text-white hover:text-[#B3A369] transition p-2 rounded-full"
+            onclick="openNotificationsPopup()"
+            aria-label="Notifications">
+            <i data-lucide="bell" class="w-6 h-6"></i>
+          </button>
+        
+          <form action="{% url 'user_profile' %}" method="get">
+            <button type="submit"
+              class="text-white hover:text-[#B3A369] transition p-2 rounded-full"
+              aria-label="Profile">
+              <i data-lucide="user" class="w-6 h-6"></i>
+            </button>
+          </form>
+        
+          <form method="POST" action="{% url 'logout' %}" onsubmit="return confirm('Are you sure you want to log out?')">
+            {% csrf_token %}
+            <button type="submit"
+              class="text-white hover:text-[#EF4444] transition p-2 rounded-full"
+              aria-label="Logout">
+              <i data-lucide="log-out" class="w-6 h-6"></i>
+            </button>
+          </form>
+        </div>
+      </div>
     </nav>
 
     <div class="flex-grow flex">
         <div id="left" class="w-1/3 bg-white p-4 shadow-md overflow-y-auto h-screen pb-24">
-            <div id="box" class="mb-4">
-                <h3 class="text-lg font-bold mb-2">Events</h3>
-                <details>
-                  <summary class="cursor-pointer">View All Events</summary>
-                  <ul class="space-y-4">
-                    {% for event in created_events %}
-                    <li class="event-item p-4 bg-gray-100 rounded shadow" data-event-id="{{ event.id }}" data-location="{{ event.location }}">
-                      <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="inline-block">
-                        {% csrf_token %}
-                        <button type="submit" class="text-yellow-500">
-                          {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
-                        </button>
-                      </form>
-                      <div class="mt-2">
-                        <h3 class="text-lg font-bold">{{ event.title }}</h3>
-                        <p class="text-sm text-gray-600">
-                          <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                          <strong>Location:</strong> {{ event.location }}<br>
-                          <strong>Number Registered:</strong> {{ event.get_registration_count }}<br>
-                          <strong>Max Capacity:</strong> {{ event.max_capacity }}
-                        </p>
-              
-                        {% if request.user in event.registered_users.all %}
-                          <button class="bg-green-500 text-white py-1 px-3 rounded mt-2">Registered</button>
-                        {% elif event.get_registration_count >= event.max_capacity %}
-                          {% with is_waitlisted=False %}
-                            {% for entry in event.waitlist_entries.all %}
-                              {% if entry.user == request.user %}
-                                <form method="POST" action="{% url 'leave_waitlist' event.id %}">
-                                  {% csrf_token %}
-                                  <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Leave Waitlist ({{ entry.position }})</button>
-                                </form>
-                              {% endif %}
-                            {% empty %}
-                              <form method="POST" action="{% url 'join_waitlist' event.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Join Waitlist</button>
-                              </form>
-                            {% endfor %}
-                          {% endwith %}
-                          <p class="text-xs text-gray-600 mt-1">Event Full – {{ event.waitlist_entries.count }} on waitlist</p>
-                        {% else %}
-                          <button class="bg-color-003057 hover:bg-color-002240 text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
+          <div id="box" class="mb-4">
+            <h3 class="text-lg font-bold mb-2">Events</h3>
+            <details>
+              <summary class="cursor-pointer">View All Events</summary>
+              <ul class="space-y-4">
+                {% for event in created_events %}
+                <li class="event-item relative px-4 py-2 bg-gray-100 rounded shadow" data-event-id="{{ event.id }}" data-location="{{ event.location }}">
+                  <div class="flex justify-between items-start">
+                    <h3 class="text-lg font-bold mt-0">{{ event.title }}</h3>
+                    <form method="POST" action="{% url 'toggle_star_event' event.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
+                        {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
+                      </button>
+                    </form>
+                  </div>
+          
+                  <p class="text-sm text-gray-600 mt-1">
+                    <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                    <strong>Location:</strong> {{ event.location }}<br>
+                    <strong>Number Registered:</strong> {{ event.get_registration_count }}<br>
+                    <strong>Max Capacity:</strong> {{ event.max_capacity }}
+                  </p>
+          
+                  {% if request.user in event.registered_users.all %}
+                  <button class="bg-green-500 text-white py-1 px-3 rounded mt-2">Registered</button>
+                  {% elif event.get_registration_count >= event.max_capacity %}
+                    {% with is_waitlisted=False %}
+                      {% for entry in event.waitlist_entries.all %}
+                        {% if entry.user == request.user %}
+                        <form method="POST" action="{% url 'leave_waitlist' event.id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Leave Waitlist ({{ entry.position }})</button>
+                        </form>
                         {% endif %}
-                      </div>
-                    </li>
-                    {% endfor %}
-                  </ul>
-                </details>
-              </div>
+                      {% empty %}
+                        <form method="POST" action="{% url 'join_waitlist' event.id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded mt-2">Join Waitlist</button>
+                        </form>
+                      {% endfor %}
+                    {% endwith %}
+                  <p class="text-xs text-gray-600 mt-1">Event Full – {{ event.waitlist_entries.count }} on waitlist</p>
+                  {% else %}
+                  <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
+                  {% endif %}
+                </li>
+                {% endfor %}
+              </ul>
+            </details>
+          </div>
 
-            <div id="box" class="mb-4">
+              <div id="box" class="mb-4">
                 <h3 class="text-lg font-bold mb-2">Registered Events</h3>
                 <details>
                     <summary class="cursor-pointer">View Registered Events</summary>
                     <ul class="space-y-4">
                         {% for event in registered_events %}
-                        <li class="event-item p-4 bg-gray-100 rounded shadow" data-event-id="{{ event.id }}" data-location="{{ event.location }}"
-                            {% if event.custom_lat and event.custom_lng %}
-                            data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
-                            {% endif %}>
-                
-                            <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="inline-block">
-                                {% csrf_token %}
-                                <button type="submit" class="text-yellow-500">
-                                    {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
-                                </button>
-                            </form>
-                
-                            <div class="mt-2">
+                        <li class="event-item relative px-4 pt-2 pb-4 bg-gray-100 rounded shadow" data-event-id="{{ event.id }}" data-location="{{ event.location }}"
+                          {% if event.custom_lat and event.custom_lng %}
+                          data-custom-lat="{{ event.custom_lat }}" data-custom-lng="{{ event.custom_lng }}"
+                          {% endif %}>
+                            
+                            <div class="flex justify-between items-start">
                                 <h3 class="text-lg font-bold">{{ event.title }}</h3>
-                                <p class="text-sm text-gray-600">
-                                    <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                                    <strong>Location:</strong> {{ event.location }} <br>
-                                    <strong>Number Registered:</strong> {{ event.get_registration_count }}<br>
-                                    <strong>Max Capacity:</strong> {{ event.max_capacity }}
-                                </p>
-                
-                                {% for registration in event.registration_set.all %}
-                                    {% if registration.user == request.user and registration.qr_code %}
-                                    <div class="mt-4">
-                                        <img src="http://127.0.0.1:8000{{ registration.qr_code.url }}" alt="Registration QR Code" class="w-32 h-32 object-contain">
-                                        <p class="text-sm text-gray-600 mt-2">Registration Code: <span class="font-mono">{{ registration.registration_code }}</span></p>
-                                    </div>
-                                    {% endif %}
-                                {% endfor %}
-                
+                                <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="ml-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
+                                        {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+            
+                            <p class="text-sm text-gray-600 mt-2">
+                                <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                                <strong>Location:</strong> {{ event.location }}<br>
+                                <strong>Number Registered:</strong> {{ event.get_registration_count }}<br>
+                                <strong>Max Capacity:</strong> {{ event.max_capacity }}
+                            </p>
+            
+                            {% for registration in event.registration_set.all %}
+                                {% if registration.user == request.user and registration.qr_code %}
+                                <div class="mt-4">
+                                    <img src="http://127.0.0.1:8000{{ registration.qr_code.url }}" alt="Registration QR Code" class="w-32 h-32 object-contain">
+                                    <p class="text-sm text-gray-600 mt-2">Registration Code: <span class="font-mono">{{ registration.registration_code }}</span></p>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+            
+                            <div class="mt-4 flex">
                                 <button 
                                     type="button" 
                                     onclick="openUnregisterPopup('{{ event.id }}')" 
-                                    class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded mt-4"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow-md transition duration-300"
                                 >
                                     Unregister
                                 </button>
@@ -232,35 +262,39 @@
             
 
             <div id="box" class="mb-4">
-                <h3 class="text-lg font-bold mb-2">Starred Events</h3>
-                <details>
-                    <summary class="cursor-pointer">View Starred Events</summary>
-                    <ul class="space-y-4">
-                        {% for event in starred_events %}
-                        <li class="event-item p-4 bg-gray-100 rounded shadow">
-                            <form method="POST" action="{% url 'toggle_star_event' event.id %}" class="inline-block">
-                                {% csrf_token %}
-                                <button type="submit" class="text-yellow-500 mr-2">
-                                    {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
-                                </button>
-                            </form>
-                            <div class="mt-2">
-                                <h3 class="text-lg font-bold">{{ event.title }}</h3>
-                                <p class="text-sm text-gray-600">
-                                    <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
-                                    <strong>Location:</strong> {{ event.location }}<br>
-                                    <strong>Number Registered:</strong> {{ event.get_registration_count }}
-                                </p>
-                                {% if request.user in event.registered_users.all %}
-                                    <button class="bg-green-500 text-white py-1 px-3 rounded mt-2">Registered</button>
-                                {% else %}
-                                    <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">Register</button>
-                                {% endif %}
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </details>
+              <h3 class="text-lg font-bold mb-2">Starred Events</h3>
+              <details>
+                <summary class="cursor-pointer">View Starred Events</summary>
+                <ul class="space-y-4">
+                  {% for event in starred_events %}
+                  <li class="event-item relative px-4 py-2 bg-gray-100 rounded shadow">
+                    <div class="flex justify-between items-start">
+                      <h3 class="text-lg font-bold mt-0">{{ event.title }}</h3>
+                      <form method="POST" action="{% url 'toggle_star_event' event.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="text-yellow-500 text-xl hover:scale-110 transition-transform">
+                          {% if request.user in event.starred_by.all %}★{% else %}☆{% endif %}
+                        </button>
+                      </form>
+                    </div>
+            
+                    <p class="text-sm text-gray-600 mt-1">
+                      <strong>When:</strong> {{ event.start_time|date:"M d, Y H:i" }} – {{ event.end_time|date:"H:i" }}<br>
+                      <strong>Location:</strong> {{ event.location }}<br>
+                      <strong>Number Registered:</strong> {{ event.get_registration_count }}
+                    </p>
+            
+                    {% if request.user in event.registered_users.all %}
+                    <button class="bg-green-500 text-white py-1 px-3 rounded mt-2">Registered</button>
+                    {% else %}
+                    <button class="bg-[#003057] hover:bg-[#002240] text-white py-1 px-3 rounded mt-2" onclick="openRPopup('{{ event.id }}'); return false;">
+                      Register
+                    </button>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+              </details>
             </div>
 
             <button id="created-events-button" class="bg-[#003057] hover:bg-[#002240] text-white py-2 px-4 rounded w-full mb-2" onclick="openCreatedEventsOverlay()">Created Events</button>
@@ -457,6 +491,8 @@
       </div>
 
     <script>
+        lucide.createIcons();
+
         flatpickr(".datetimepicker", {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
