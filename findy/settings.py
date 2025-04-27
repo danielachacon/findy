@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'theme',
     'django_browser_reload',
     'widget_tweaks',
+    'django_celery_beat',
+    'celery',
 ]
 
 MIDDLEWARE = [
@@ -158,3 +160,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 TAILWIND_APP_NAME = 'theme'
 
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TIMEZONE = TIME_ZONE
