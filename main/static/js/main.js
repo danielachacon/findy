@@ -755,3 +755,44 @@ if (editingEventId) {
     window.location.href = `/main/events/edit/${editingEventId}/`;
   });
 }
+
+function openEventHistoryPopup() {
+    document.getElementById('event-history-overlay').classList.remove('hidden');
+}
+
+function closeEventHistoryPopup() {
+    document.getElementById('event-history-overlay').classList.add('hidden');
+}
+
+function openFeedbackPopup(eventId) {
+    document.getElementById('feedback_event_id').value = eventId;
+    document.getElementById('feedback-popup').classList.remove('hidden');
+}
+
+function closeFeedbackPopup() {
+    document.getElementById('feedback-popup').classList.add('hidden');
+}
+
+function openViewFeedbackPopup(eventId) {
+    fetch(`/main/get-feedback/${eventId}/`)
+      .then(response => response.json())
+      .then(data => {
+        const feedbackList = document.getElementById('feedback-list');
+        feedbackList.innerHTML = '';
+        if (data.success) {
+          data.feedbacks.forEach(feedback => {
+            const li = document.createElement('li');
+            li.className = 'bg-gray-100 p-4 rounded shadow';
+            li.innerHTML = `<p><strong>${feedback.user}:</strong> ${feedback.text}</p><p class='text-sm text-gray-500'>${feedback.created_at}</p>`;
+            feedbackList.appendChild(li);
+          });
+        } else {
+          feedbackList.innerHTML = '<li class="text-gray-500 italic">No feedback available.</li>';
+        }
+        document.getElementById('view-feedback-popup').classList.remove('hidden');
+      });
+  }
+
+  function closeViewFeedbackPopup() {
+    document.getElementById('view-feedback-popup').classList.add('hidden');
+  }

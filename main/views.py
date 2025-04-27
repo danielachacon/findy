@@ -1,14 +1,16 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomEventForm, EventSearchForm
-from .models import Event, Registration, Announcement, Waitlist
+from .models import Event, Feedback, Registration, Announcement, Waitlist
 from django.http import JsonResponse
 from .locations import GTLocations
 import json
 from django.urls import reverse
 from django.contrib import messages
-from django.db.models import F
+from django.db.models import F, Exists, OuterRef
 import uuid
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def main_view(request):
@@ -20,10 +22,12 @@ def main_view(request):
 
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
-    starred_events = Event.objects.filter(starred_by=request.user)
-    events = Event.objects.all()
-    registered_events = request.user.registered_events.all()
-
+    starred_events = Event.objects.filter(starred_by=request.user, end_time__gte=now())
+    events = Event.objects.filter(end_time__gte=now())
+    past_events = Event.objects.filter(end_time__lt=now()).annotate(
+        has_feedback=Exists(Feedback.objects.filter(event=OuterRef('pk'), user=request.user))
+    )
+    registered_events = request.user.registered_events.filter(end_time__gte=now())
 
     locations_dict = {}
     for location_name in GTLocations.get_location_names():
@@ -109,6 +113,8 @@ def main_view(request):
         'registered_events': registered_events,
         'locations_json': locations_json,
         'announcements': Announcement.objects.filter(event__in=registered_events).order_by('-created_at'),
+        'past_events': past_events,
+        'now': now(),
     })
 
 
@@ -390,7 +396,53 @@ def event_search(request):
         'events': events,
         'registered_events': registered_events,
         'starred_events': starred_events,
-        'events_open': True
+        'events_open': True,
     }
 
     return render(request, 'main/index.html', context)
+
+@login_required
+def event_history(request):
+    past_events = Event.objects.filter(end_time__lt=now())
+    return render(request, 'main/event_history.html', {'past_events': past_events})
+
+@csrf_exempt
+@login_required
+def leave_feedback(request):
+    if request.method == 'POST':
+        event_id = request.POST.get('event_id')
+        feedback_text = request.POST.get('feedback')
+
+        if not event_id or not feedback_text:
+            return JsonResponse({'success': False, 'error': 'Event ID and feedback are required.'}, status=400)
+
+        try:
+            event = Event.objects.get(id=event_id)
+
+            if request.user not in event.registered_users.all():
+                return JsonResponse({'success': False, 'error': 'You are not registered for this event.'}, status=403)
+
+            Feedback.objects.create(user=request.user, event=event, feedback=feedback_text)
+
+            return JsonResponse({'success': True, 'message': 'Feedback submitted successfully.'})
+        except Event.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Event not found.'}, status=404)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+@login_required
+def get_feedback(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id, created_by=request.user)
+        feedbacks = event.feedbacks.all()
+        feedback_data = [
+            {
+                'user': feedback.user.username,
+                'text': feedback.feedback,
+                'created_at': feedback.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            for feedback in feedbacks
+        ]
+        return JsonResponse({'success': True, 'feedbacks': feedback_data})
+    except Event.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Event not found or you are not authorized to view feedback.'}, status=404)
