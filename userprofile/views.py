@@ -16,10 +16,9 @@ def user_profile(request):
 def edit_profile(request):
     profile = request.user.profile
 
-    if request.method == 'POST':
-        if request.FILES.get('profile_picture'):
-            profile.profile_picture = request.FILES['profile_picture']
-            profile.save()
-        return redirect('user_profile') 
+    if request.method == 'POST' and request.FILES.get('profile_picture'):
+        profile.profile_picture = request.FILES['profile_picture']
+        profile.save()
+        return redirect('user_profile')
 
     return render(request, 'edit_profile.html', {'profile': profile})

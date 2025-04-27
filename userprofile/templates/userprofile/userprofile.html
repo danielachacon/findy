@@ -47,9 +47,6 @@
       <a href="{% url 'password_change' %}" class="inline-block bg-white text-[#003057] border border-[#003057] hover:bg-[#f0f0f0] text-sm font-semibold px-5 py-2 rounded-md transition duration-300 mr-4">
         Reset Password
       </a>
-      <a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to log out?')" class="inline-block bg-red-500 text-white hover:bg-red-600 text-sm font-semibold px-5 py-2 rounded-md transition duration-300">
-        Logout
-      </a>
     </div>
   </div>
 
@@ -57,7 +54,7 @@
     <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-lg relative font-sans">
       <span onclick="closeEditProfileModal()" class="absolute top-4 right-5 text-xl font-bold text-gray-600 cursor-pointer hover:text-gray-800">&times;</span>
       <h2 class="text-2xl font-semibold text-center text-[#003057] mb-6">Edit Profile</h2>
-      <form method="POST" enctype="multipart/form-data" class="space-y-5">
+      <form method="POST" action="{% url 'edit_profile' %}" enctype="multipart/form-data" class="space-y-5">
         {% csrf_token %}
         <div>
           <label for="profile_picture" class="block text-sm font-medium text-gray-700">Profile Picture</label>
