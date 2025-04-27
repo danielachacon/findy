@@ -5,13 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ecea575-7954-4332-ab56-3f2a5370e97a" name="Changes" comment="Added Max Capacity Information">
-      <change afterPath="$PROJECT_DIR$/findy/celery.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main/management/commands/send_upcoming_event_announcements.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/findy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/findy.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/findy/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/findy/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/findy/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/findy/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/static/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main/static/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,22 +45,22 @@
     &quot;assignee&quot;: &quot;samk237&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/danielachacon/findy.git",
-    "accountId": "8d1be21c-b8e0-45d0-9d50-dbb6eb3ec475"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/danielachacon/findy.git&quot;,
+    &quot;accountId&quot;: &quot;8d1be21c-b8e0-45d0-9d50-dbb6eb3ec475&quot;
   },
-  "recentNewPullRequestHead": {
-    "server": {
-      "useHttp": false,
-      "host": "github.com",
-      "port": null,
-      "suffix": null
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
     },
-    "owner": "danielachacon",
-    "repository": "findy"
+    &quot;owner&quot;: &quot;danielachacon&quot;,
+    &quot;repository&quot;: &quot;findy&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -82,7 +81,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "unique__acc__fix",
+    "git-widget-placeholder": "notify__before",
     "last_opened_file_path": "/Users/samkhang/Desktop/Django/findy",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
@@ -90,6 +89,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -111,7 +111,7 @@
         <env name="DJANGO_SETTINGS_MODULE" value="findy.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.12 (moviesstore) (4)" />
+      <option name="SDK_NAME" value="Python 3.13" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -149,7 +149,8 @@
       <workItem from="1743975317837" duration="1903000" />
       <workItem from="1743989526618" duration="4820000" />
       <workItem from="1744577785911" duration="9967000" />
-      <workItem from="1745727189860" duration="2326000" />
+      <workItem from="1745727189860" duration="2744000" />
+      <workItem from="1745768496506" duration="4081000" />
     </task>
     <task id="LOCAL-00001" summary="Created about and start page. about page is like the welcome page and start page is like the page for those who are logged in (home). I also moved most of html stuff into a single base html and css">
       <option name="closed" value="true" />

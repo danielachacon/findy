@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     'theme',
     'django_browser_reload',
     'widget_tweaks',
-    'django_celery_beat',
     'celery',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [

@@ -15,15 +15,6 @@ function toggleOverlay(overlayId, show) {
     }
 }
 
-function openAnnouncementPopup(eventId) {
-    document.getElementById('announcement_event_id').value = eventId;
-    toggleOverlay('announcement-overlay', true);
-}
-
-function closeAnnouncementPopup() {
-    toggleOverlay('announcement-overlay', false);
-}
-
 function openRPopup(eventId) {
     const eventIdField = document.getElementById('event_id_field');
     if (eventIdField) {
@@ -80,12 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("created-events-button")?.addEventListener("click", openCreatedEventsOverlay);
     document.getElementById("create-event-button")?.addEventListener("click", openCreateEventModal);
 
-    document.querySelector("#announcement-overlay")?.addEventListener("click", (e) => {
-        if (e.target.id === "announcement-overlay") {
-            closeAnnouncementPopup();
-        }
-    });
-
     document.querySelector("#register-popup")?.addEventListener("click", (e) => {
         if (e.target.id === "register-popup") {
             closeRegisterPopup();
@@ -106,7 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-            closeAnnouncementPopup();
             closeRegisterPopup();
             closeUnregisterPopup();
             closeCreatedEventsOverlay();
@@ -453,63 +437,6 @@ registerForm.addEventListener('submit', function(e) {
     setTimeout(() => {
         registerForm.submit();
     }, 800);
-});
-
-const notificationsOverlay = document.getElementById("notifications-overlay");
-const notificationsContainer = document.getElementById("notifications-popup").querySelector(".notifications-list");
-
-function openNotificationsPopup() {
-    notificationsContainer.innerHTML = '<div class="loading">Loading notifications...</div>';
-    notificationsOverlay.classList.remove("hidden");
-
-    fetch("{% url 'notifications' %}", {
-        method: "GET",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            notificationsContainer.innerHTML = '';
-
-            if (data.notifications.length === 0) {
-                notificationsContainer.innerHTML = '<div class="no-notifications">You have no notifications at this time.</div>';
-            } else {
-                data.notifications.forEach(notification => {
-                    const notificationCard = document.createElement('li');
-                    notificationCard.className = 'notification-card';
-
-                    notificationCard.innerHTML = `
-                        <div class="notification-header">
-                            <div class="notification-event">${notification.event_title}</div>
-                            <div class="notification-date">${notification.created_at}</div>
-                        </div>
-                        <div class="notification-message">${notification.message}</div>
-                    `;
-
-                    notificationsContainer.appendChild(notificationCard);
-                });
-            }
-        } else {
-            notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
-        }
-    })
-    .catch(error => {
-        console.error("Error fetching notifications:", error);
-        notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
-    });
-}
-
-function closeNotificationsPopup() {
-    notificationsOverlay.classList.add("hidden");
-}
-
-notificationsOverlay.addEventListener("click", (e) => {
-    if (e.target === notificationsOverlay) {
-        notificationsOverlay.classList.add("hidden");
-    }
 });
 
 // Function to validate the registration code
