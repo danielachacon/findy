@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="9ecea575-7954-4332-ab56-3f2a5370e97a" name="Changes" comment="Added Max Capacity Information">
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/findy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/findy.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/findy/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/findy/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/findy/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/findy/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +76,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "event__cap",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/samkhang/Desktop/Django/findy",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
@@ -108,6 +105,7 @@
         <env name="DJANGO_SETTINGS_MODULE" value="findy.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12 (moviesstore) (4)" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
