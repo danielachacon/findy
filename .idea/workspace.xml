@@ -6,9 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="9ecea575-7954-4332-ab56-3f2a5370e97a" name="Changes" comment="Added Max Capacity Information">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/findy/celery.py" beforeDir="false" afterPath="$PROJECT_DIR$/findy/celery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/findy/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/findy/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +146,7 @@
       <workItem from="1743989526618" duration="4820000" />
       <workItem from="1744577785911" duration="9967000" />
       <workItem from="1745727189860" duration="2744000" />
-      <workItem from="1745768496506" duration="6280000" />
+      <workItem from="1745768496506" duration="7459000" />
     </task>
     <task id="LOCAL-00001" summary="Created about and start page. about page is like the welcome page and start page is like the page for those who are logged in (home). I also moved most of html stuff into a single base html and css">
       <option name="closed" value="true" />
