@@ -447,7 +447,7 @@
                   {% csrf_token %}
                   <button type="submit" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded">Delete</button>
                 </form>
-                <button type="button" class="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded" onclick="openAnnouncementPopup('{{ event.id }}')">Announce</button>
+                <button type="button" class="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded" onclick="openAnnouncementPopup({{ event.id }})">Announce</button>
               </div>
             </li>
             {% endfor %}
@@ -609,6 +609,75 @@
         dateFormat: "Y-m-d H:i",
         time_24hr: false
     });</script>
+    <script>
+        const notificationsOverlay = document.getElementById("notifications-overlay");
+        const notificationsContainer = document.getElementById("notifications-popup").querySelector(".notifications-list");
+
+        function openNotificationsPopup() {
+            notificationsContainer.innerHTML = '<div class="loading">Loading notifications...</div>';
+            notificationsOverlay.classList.remove("hidden");
+
+            fetch("{% url 'notifications' %}", {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    notificationsContainer.innerHTML = '';
+                    if (data.notifications.length === 0) {
+                        notificationsContainer.innerHTML = '<div class="no-notifications">You have no notifications at this time.</div>';
+                    } else {
+                        data.notifications.forEach(notification => {
+                            const notificationCard = document.createElement('li');
+                            notificationCard.className = 'notification-card';
+                            notificationCard.innerHTML = `
+                                    <div class="notification-header">
+                                        <div class="notification-event">${notification.event_title}</div>
+                                        <div class="notification-date">${notification.created_at}</div>
+                                    </div>
+                                    <div class="notification-message">${notification.message}</div>
+                                `;
+                            notificationsContainer.appendChild(notificationCard);
+                        });
+                    }
+                } else {
+                    notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching notifications:", error);
+                notificationsContainer.innerHTML = '<div class="error">Error loading notifications</div>';
+            });
+        }
+
+        function closeNotificationsPopup() {
+            notificationsOverlay.classList.add("hidden");
+        }
+
+        notificationsOverlay.addEventListener("click", (e) => {
+            if (e.target === notificationsOverlay) {
+                notificationsOverlay.classList.add("hidden");
+            }
+        });
+    </script>
+    <script>
+        function openAnnouncementPopup(eventId) {
+            console.log(eventId);
+            document.getElementById('announcement_event_id').value = eventId;
+            var form = document.getElementById('announcement-form');
+            form.action = "/main/event/" + eventId + "/make_announcement/";
+
+            toggleOverlay('announcement-overlay', true);
+        }
+
+        function closeAnnouncementPopup() {
+            toggleOverlay('announcement-overlay', false);
+        }
+    </script>
     <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>
