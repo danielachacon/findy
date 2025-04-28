@@ -17,7 +17,7 @@ class EventSearchForm(forms.Form):
     )
 
     location = forms.ChoiceField(
-        choices=[('', 'All Locations')] + [(key, value) for key, value in GTLocations._locations.items()],
+        choices=[('', 'All Locations')] + [(key, value['name']) for key, value in GTLocations._locations.items()],
         required=False
     )
 
