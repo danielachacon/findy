@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 from django.core.mail import send_mail
+import pytz
 from main.models import Event
 from datetime import timedelta
 
@@ -10,16 +11,19 @@ class Command(BaseCommand):
     help = 'Send event reminders to users 30 minutes before the event starts.'
 
     def handle(self, *args, **kwargs):
+        eastern = pytz.timezone('America/New_York')
         upcoming_events = Event.objects.filter(start_time__lte=now() + timedelta(minutes=30), start_time__gt=now())
         for event in upcoming_events:
             registered_users = event.registered_users.all()
             for user in registered_users:
+                local_start_time = event.start_time.astimezone(eastern)
                 try:
                     send_mail(
                         subject=f"Reminder: {event.title} starts in 30 minutes!",
                         message=(
                             f"Hi {user.username},\n\n"
-                            f"This is a reminder that the event '{event.title}' will start on {event_start_time}.\n\n"
+                            f"This is a reminder that the event '{event.title}' will start at "
+                            f"{local_start_time.strftime('%B %d, %Y at %I:%M %p %Z')}.\n\n"
                             f"Location: {event.location}\n\n"
                             f"Thank you,\nFindy Team"
                         ),
