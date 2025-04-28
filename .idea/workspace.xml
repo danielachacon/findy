@@ -6,9 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="9ecea575-7954-4332-ab56-3f2a5370e97a" name="Changes" comment="Added Max Capacity Information">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/static/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/main/static/css/main.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/static/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main/static/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/factories.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/factories.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/strategy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +80,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "fix__announce",
+    "git-widget-placeholder": "strategy-pattern",
     "last_opened_file_path": "/Users/samkhang/Desktop/Django/findy",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
@@ -147,7 +149,7 @@
       <workItem from="1743989526618" duration="4820000" />
       <workItem from="1744577785911" duration="9967000" />
       <workItem from="1745727189860" duration="2744000" />
-      <workItem from="1745768496506" duration="10656000" />
+      <workItem from="1745768496506" duration="13131000" />
     </task>
     <task id="LOCAL-00001" summary="Created about and start page. about page is like the welcome page and start page is like the page for those who are logged in (home). I also moved most of html stuff into a single base html and css">
       <option name="closed" value="true" />

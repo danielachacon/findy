@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.utils.timezone import now
 from django.utils import timezone
+from .strategy import NotificationStrategy, NotificationContext
 
 
 User = get_user_model()
@@ -66,14 +67,9 @@ class Registration(models.Model):
                 event=event
             )
             first_in_line.delete()
-            
-            send_mail(
-                f'Spot Available in {event.title}',
-                f'A spot has opened up in {event.title} and you have been automatically registered!',
-                'from@example.com',
-                [first_in_line.user.email],
-                fail_silently=True,
-            )
+
+            notification_context = NotificationContext()
+            notification_context.notify(event, first_in_line.user)
 
     def __str__(self):
         return f"{self.event} @ {self.user.username} : Code: {self.registration_code}"
