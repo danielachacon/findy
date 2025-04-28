@@ -497,7 +497,8 @@ header {
 }
 
 .notification-card {
-    background-color: #f8f9fa;
+    width:auto;
+    height:auto;
     border-radius: 5px;
     padding: 1rem;
     margin-bottom: 1rem;
@@ -573,3 +574,4 @@ header {
     color: white;
     border-radius: 5px;
 }
+

@@ -683,10 +683,10 @@
                     } else {
                         data.notifications.forEach(notification => {
                             const notificationCard = document.createElement('li');
-                            notificationCard.className = 'notification-card';
+                            notificationCard.className = 'notification-card relative px-4 py-2 bg-gray-100 rounded shadow';
                             notificationCard.innerHTML = `
                                     <div class="notification-header">
-                                        <div class="notification-event">${notification.event_title}</div>
+                                        <div class="notification-event text-lg font-bold">${notification.event_title}</div>
                                         <div class="notification-date">${notification.created_at}</div>
                                     </div>
                                     <div class="notification-message">${notification.message}</div>
