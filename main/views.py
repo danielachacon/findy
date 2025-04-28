@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.db.models import F, Exists, OuterRef
 import uuid
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from django.views.decorators.csrf import csrf_exempt
 
 @login_required
@@ -18,7 +18,7 @@ def main_view(request):
     created_events = Event.objects.filter(created_by=request.user)
     starred_events = Event.objects.filter(starred_by=request.user, end_time__gte=now())
     events = Event.objects.filter(end_time__gte=now())
-    past_events = Event.objects.filter(end_time__lt=now()).annotate(
+    past_events = Event.objects.filter(end_time__lt=localtime(now())).annotate(
         has_feedback=Exists(Feedback.objects.filter(event=OuterRef('pk'), user=request.user))
     )
     registered_events = request.user.registered_events.filter(end_time__gte=now())
@@ -34,7 +34,6 @@ def main_view(request):
             }
 
     locations_json = json.dumps(locations_dict)
-
     if request.method == 'POST':
         if 'submit_register' in request.POST:
             event_id = request.POST.get('event_id')
@@ -62,17 +61,18 @@ def main_view(request):
 
         else:
             form = CustomEventForm(request.POST)
-
-            if form.is_valid() and 'submit_event' in request.POST:
+            if form.is_valid():
                 cd = form.cleaned_data
                 location_value = cd['location']
 
-                custom_location = request.POST.get('custom_location')
+                custom_location = request.POST.get('custom_location', '').strip()
                 custom_lat = request.POST.get('custom_lat')
                 custom_lng = request.POST.get('custom_lng')
 
                 if location_value == "Custom" and custom_location:
                     location_value = custom_location
+                else:
+                    location_value = cd['location']
 
                 event = Event.objects.create(
                     title=cd['title'],
@@ -333,24 +333,24 @@ def validate_event_code(request, event_id):
         'is_valid': is_valid
     })
 
-@login_required
-def create_event_view(request):
-    form = CustomEventForm(request.POST or None)
-    show_modal = False
+# @login_required
+# def create_event_view(request):
+#     form = CustomEventForm(request.POST or None)
+#     show_modal = False
 
-    if request.method == 'POST':
-        if form.is_valid():
-            event = form.save(commit=False)
-            event.created_by = request.user
-            event.save()
-            return redirect('main')  # Replace with your actual redirect
-        else:
-            show_modal = True  # Keep the modal open if the form is invalid
+#     if request.method == 'POST':
+#         if form.is_valid():
+#             event = form.save(commit=False)
+#             event.created_by = request.user
+#             event.save()
+#             return redirect('main')
+#         else:
+#             show_modal = True
 
-    return render(request, 'main/index.html', {
-        'form': form,
-        'show_create_modal': show_modal
-    })
+#     return render(request, 'main/index.html', {
+#         'form': form,
+#         'show_create_modal': show_modal
+#     })
 
 @login_required
 def event_search(request):
@@ -404,21 +404,25 @@ def leave_feedback(request):
         feedback_text = request.POST.get('feedback')
 
         if not event_id or not feedback_text:
-            return JsonResponse({'success': False, 'error': 'Event ID and feedback are required.'}, status=400)
+            messages.error(request, 'Event ID and feedback are required.')
+            return redirect('main')
 
         try:
             event = Event.objects.get(id=event_id)
 
             if request.user not in event.registered_users.all():
-                return JsonResponse({'success': False, 'error': 'You are not registered for this event.'}, status=403)
+                messages.error(request, 'You are not registered for this event.')
+                return redirect('main')
 
             Feedback.objects.create(user=request.user, event=event, feedback=feedback_text)
-
-            return JsonResponse({'success': True, 'message': 'Feedback submitted successfully.'})
+            messages.success(request, 'Feedback submitted successfully.')
+            return redirect('main')
         except Event.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Event not found.'}, status=404)
+            messages.error(request, 'Event not found.')
+            return redirect('main')
 
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+    messages.error(request, 'Invalid request method.')
+    return redirect('main')
 
 @login_required
 def get_feedback(request, event_id):

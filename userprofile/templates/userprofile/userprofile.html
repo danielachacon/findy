@@ -31,7 +31,7 @@
       <h3 class="text-2xl font-semibold text-gray-800 mb-4">Profile Details</h3>
       <ul class="space-y-2 text-[15px] text-gray-700">
         <li><strong>Email:</strong> {{ user.email }}</li>
-        <li><strong>Events Attended:</strong> {{ user.registered_events.count }}</li>
+        <li><strong>Events Attended:</strong> {{ past_registered_events.count }}</li>
         <li><strong>Starred Events:</strong> {{ user.starred_events.count }}</li>
         <li><strong>Events Created:</strong> {{ user.created_events.count }}</li>
       </ul>

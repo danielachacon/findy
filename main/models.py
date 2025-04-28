@@ -6,7 +6,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.utils.timezone import now
-from pytz import timezone
+from django.utils import timezone
 
 
 User = get_user_model()
@@ -22,6 +22,7 @@ class Event(models.Model):
     custom_lng = models.FloatField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_events')
     created_at = models.DateTimeField(auto_now_add=True)
+    reminder_sent = models.BooleanField(default=False)
 
     registered_users = models.ManyToManyField(
         User,
@@ -132,7 +133,7 @@ class Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='feedbacks')
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='feedbacks')
     feedback = models.TextField()
-    created_at = models.DateTimeField(default=lambda: now().astimezone(timezone('US/Eastern')))
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         unique_together = ('user', 'event')
