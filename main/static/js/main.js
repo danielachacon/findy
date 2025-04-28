@@ -139,15 +139,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-L.polygon([
-    [33.770, -84.405], [33.770, -84.385],
-    [33.780, -84.385], [33.780, -84.405]
-], {
-    color: "#003B5C",
-    fillOpacity: 0.05,
-    weight: 2
-}).addTo(map);
-
 function addLocationMarker(locationName, eventTitle, customLat, customLng) {
     if (customLat !== undefined && customLng !== undefined) {
         L.marker([customLat, customLng])
