@@ -11,8 +11,95 @@ from django.db.models import F, Exists, OuterRef
 import uuid
 from django.utils.timezone import now, localtime
 from django.views.decorators.csrf import csrf_exempt
+from .factories import ConcreteEventFactory, EventFactoryInterface
 
 @login_required
+def main_view(request):
+    form = CustomEventForm()
+    created_events = Event.objects.filter(created_by=request.user)
+    starred_events = Event.objects.filter(starred_by=request.user, end_time__gte=now())
+    events = Event.objects.filter(end_time__gte=now())
+    past_events = Event.objects.filter(end_time__lt=localtime(now())).annotate(
+        has_feedback=Exists(Feedback.objects.filter(event=OuterRef('pk'), user=request.user))
+    )
+    registered_events = request.user.registered_events.filter(end_time__gte=now())
+
+    locations_dict = {}
+    for location_name in GTLocations.get_location_names():
+        location = GTLocations.get_location(location_name)
+        if location:
+            locations_dict[location_name] = {
+                "lat": location["latitude"],
+                "lng": location["longitude"],
+                "name": location["name"]
+            }
+
+    locations_json = json.dumps(locations_dict)
+    if request.method == 'POST':
+        if 'submit_register' in request.POST:
+            event_id = request.POST.get('event_id')
+            event = Event.objects.get(id=event_id)
+            if event.get_registration_count() < event.max_capacity:
+                registration = Registration.objects.create(
+                    user=request.user,
+                    event=event,
+                )
+
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'qr_code_url': registration.qr_code.url
+                    })
+            else:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Event is at full capacity.'
+                    })
+
+            redirect_url = f"{reverse('main')}?just_registered=true&event_id={event_id}"
+            return redirect(redirect_url)
+
+        else:
+            form = CustomEventForm(request.POST)
+            if form.is_valid():
+                cd = form.cleaned_data
+
+                custom_location = request.POST.get('custom_location', '').strip()
+                custom_lat = request.POST.get('custom_lat')
+                custom_lng = request.POST.get('custom_lng')
+
+
+                event_factory = ConcreteEventFactory()
+                event = event_factory.create_event(
+                    form_data=cd,
+                    user=request.user,
+                    custom_location = custom_location,
+                    custom_lat=custom_lat,
+                    custom_lng=custom_lng,
+                )
+
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True})
+                return redirect('main')
+            else:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    return render(request, 'main/index.html', {
+        'form': form,
+        'created_events': created_events,
+        'starred_events': starred_events,
+        'events': events,
+        'registered_events': registered_events,
+        'locations_json': locations_json,
+        'announcements': Announcement.objects.filter(event__in=registered_events).order_by('-created_at'),
+        'past_events': past_events,
+        'now': now(),
+    })
+
+#This is the main view that we use, this uses the factory design pattern for making events
+@login_required()
 def main_view(request):
     form = CustomEventForm()
     created_events = Event.objects.filter(created_by=request.user)
@@ -74,14 +161,14 @@ def main_view(request):
                 else:
                     location_value = cd['location']
 
-                event = Event.objects.create(
-                    title=cd['title'],
-                    description=cd['description'],
-                    start_time=cd['start_time'],
-                    end_time=cd['end_time'],
-                    max_capacity=cd['max_capacity'],
-                    location=location_value,
-                    created_by=request.user
+                #This is where we make our concrete factory, which we use to create events
+                event_factory = ConcreteEventFactory()
+                event = event_factory.create_event(
+                    form_data=cd,
+                    user=request.user,
+                    custom_location=custom_location,
+                    custom_lat=custom_lat,
+                    custom_lng=custom_lng
                 )
 
                 if custom_lat and custom_lng:
@@ -107,7 +194,6 @@ def main_view(request):
         'past_events': past_events,
         'now': now(),
     })
-
 
 @login_required
 def make_announcement(request, event_id):
