@@ -336,17 +336,23 @@
 
     <div id="notifications-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
         <div id="notifications-popup" class="modal w-full max-w-md relative">
-        <button type="button" onclick="closeNotificationsPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
-        <h2 class="text-2xl font-bold text-[#003057] text-center mb-4">Notifications</h2>
-        <ul class="notifications-list space-y-2 text-sm text-gray-700">
-            {% if notifications %}
-              {% for notification in notifications %}
-                <li>{{ notification.message }}</li>
-              {% endfor %}
-            {% else %}
-              <li class="text-gray-500 italic text-center py-4">No notifications at the moment.</li>
-            {% endif %}
-          </ul>
+            <button type="button" onclick="closeNotificationsPopup()" class="absolute top-4 right-4 text-2xl font-bold text-gray-500 hover:text-gray-800" aria-label="Close">&times;</button>
+            <h2 class="text-2xl font-bold text-[#003057] text-center mb-4">Notifications</h2>
+            <ul class="notifications-list space-y-4">
+                {% if notifications %}
+                    {% for notification in notifications %}
+                        <li class="bg-white border border-gray-200 rounded-lg shadow-md p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-lg font-semibold text-[#003057]">{{ notification.event_title }}</h3>
+                                <span class="text-sm text-gray-500">{{ notification.created_at }}</span>
+                            </div>
+                            <p class="text-gray-700 text-sm">{{ notification.message }}</p>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="text-gray-500 italic text-center py-4">No notifications at the moment.</li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 
@@ -685,11 +691,13 @@
                             const notificationCard = document.createElement('li');
                             notificationCard.className = 'notification-card';
                             notificationCard.innerHTML = `
-                                    <div class="notification-header">
-                                        <div class="notification-event">${notification.event_title}</div>
-                                        <div class="notification-date">${notification.created_at}</div>
+                                   <div class="notification-card p-4 bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition duration-200">
+                                    <div class="notification-header flex justify-between items-center border-b pb-2 mb-3">
+                                        <h3 class="font-semibold text-[#003057] text-base sm:text-lg truncate">${notification.event_title}</h3>
+                                        <span class="text-xs sm:text-sm text-gray-500">${notification.created_at}</span>
                                     </div>
-                                    <div class="notification-message">${notification.message}</div>
+                                    <p class="notification-message text-sm sm:text-base text-gray-700 leading-relaxed">${notification.message}</p>
+                                </div>
                                 `;
                             notificationsContainer.appendChild(notificationCard);
                         });
